@@ -4,13 +4,17 @@ import {IoMdMoon} from "react-icons/io";
 import Dropdown from "./comp/Dropdown.tsx";
 import DropdownButton from "./comp/DropdownButton.tsx";
 import {useGRBL} from "../GRBLContext.tsx";
+import {useModal} from "../ModalContext.tsx";
 
 export default function Topbar() {
     const {setTheme} = useGRBL();
+    const {showModal} = useModal();
 
     return <div id={"topbar"}>
         <Dropdown icon={<IoFileTray className="icon" size={20}/>} text={"File"} id={"file"}>
-            <DropdownButton text={"Opt A"}/>
+            <DropdownButton text={"Opt A"} onClick={() => {
+                showModal(<div>Hello World</div>)
+            }} closeOnClick/>
             <DropdownButton text={"Opt B"}/>
             <DropdownButton text={"Opt C"}/>
         </Dropdown>

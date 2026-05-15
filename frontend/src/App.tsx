@@ -6,29 +6,39 @@ import Terminal from "./terminal/Terminal.tsx";
 import {GRBLProvider, useGRBL} from "./GRBLContext.tsx";
 import {DropdownProvider, useDropdown} from "./topbar/comp/DropdownMenuContext.tsx";
 import {useEffect} from "react";
+import {ModalProvider, useModal} from "./ModalContext.tsx";
 
 function App() {
     return <GRBLProvider>
-        <DropdownProvider>
-            <Themeable/>
-        </DropdownProvider>
+        <ModalProvider>
+            <DropdownProvider>
+                <Themeable/>
+            </DropdownProvider>
+        </ModalProvider>
     </GRBLProvider>
 }
 
 function Themeable() {
     const {theme} = useGRBL();
-    const {setCurrent} = useDropdown();
+    const {setCurrent, current} = useDropdown();
+    const {isOpen, close} = useModal();
 
     useEffect(() => {
         const handler = (e: KeyboardEvent) => {
             if (e.key === "Escape") {
                 e.preventDefault();
-                setCurrent(null);
+                if(isOpen) {
+                    close();
+                }
+                else if(current != null) {
+                    setCurrent(null);
+                }
+
             }
         };
         window.addEventListener("keydown", handler);
         return () => window.removeEventListener("keydown", handler);
-    }, [setCurrent]);
+    }, [close, current, isOpen, setCurrent]);
 
     return <div id={"theme"} className={theme.name} tabIndex={-1}>
         <div id={"app-top"}>
