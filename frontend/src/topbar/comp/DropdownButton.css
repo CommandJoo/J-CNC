@@ -1,0 +1,13 @@
+.dropdown-button {
+    height: 3dvh;
+    vertical-align: center;
+    display: flex;
+    align-items: center;
+    padding: 0.5dvh;
+    box-sizing: border-box;
+    background: var(--bg-light);
+}
+
+.dropdown-button:hover {
+    background: var(--bg-highlight);
+}

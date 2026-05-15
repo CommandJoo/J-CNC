@@ -1,0 +1,45 @@
+#preview {
+    background: var(--bg);
+    width: 100%;
+    height: 100%;
+
+    border-radius: var(--border-radius-big);
+
+    display: flex;
+
+    position: relative;
+
+    #canvas {
+        width: 94dvw;
+        height: 100%;
+        image-rendering: auto;
+        display: block;
+    }
+
+    overflow: scroll;
+
+    #info {
+        position: absolute;
+        width: 15dvw;
+
+        right: 1dvh;
+        top: 1dvh;
+        padding: 1dvh;
+        border-radius: var(--border-radius-big);
+        background: #0008;
+        color: #FFF;
+
+        display: grid;
+        grid-template-columns: 2fr 3fr 3fr;
+        column-gap: 0.5dvw;
+
+        div {
+            text-align: right;
+            white-space: preserve;
+
+            &.first {
+                text-align: left;
+            }
+        }
+    }
+}

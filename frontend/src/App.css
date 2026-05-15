@@ -1,0 +1,127 @@
+:root {
+    &:has(#root #theme.light) {
+        --bg-dark: hsl(220, 100%, 90%);
+        --bg: hsl(220, 100%, 92%);
+        --bg-light: hsl(220, 100%, 95%);
+        --bg-highlight: hsl(220, 100%, 98%);
+
+        --color: hsl(220, 100%, 2%);
+        --color-muted: hsl(220, 50%, 8%);
+
+        --red: #FF4444DD;
+        --blue: #4444FFDD;
+    }
+
+    &:has(#root #theme.dark) {
+        --bg-dark: hsl(220, 100%, 3%);
+        --bg: hsl(220, 100%, 6%);
+        --bg-light: hsl(220, 100%, 10%);
+        --bg-highlight: hsl(220, 100%, 13%);
+
+        --color: hsl(220, 100%, 98%);
+        --color-muted: hsl(220, 50%, 92%);
+
+        --red: #FF4444DD;
+        --blue: #4444FFDD;
+    }
+
+    &:has(#root #theme.dracula) {
+        --bg-dark: hsl(231, 15%, 15%);
+        --bg: hsl(232, 14%, 18%);
+        --bg-light: hsl(231, 15%, 23%);
+        --bg-highlight: hsl(231, 15%, 31%);
+
+        --color: hsl(60, 30%, 96%);
+        --color-muted: hsl(60, 15%, 85%);
+
+        --red: #FF5555;
+        --blue: #BD93F9;
+    }
+
+    &:has(#root #theme.monokai) {
+        --bg-dark: #211F21;
+        --bg: #2D2A2E;
+        --bg-light: #37343A;
+        --bg-highlight: #3B383E;
+
+        --color: #E3E1E4;
+        --color-muted: #848089;
+
+        --red: #F85E84;
+        --blue: #AB9DF2;
+    }
+
+    --ruler-color: var(--color-muted);
+    --number-color: var(--color-muted);
+    --unit-color: var(--color);
+}
+
+#root {
+    margin: 0;
+    padding: 0;
+    gap: 0;
+
+    #theme {
+        margin: 0;
+
+        padding: 0.5dvh;
+        gap: 0.5dvh;
+        box-sizing: border-box;
+
+        min-height: 100dvh;
+        height: 100dvh;
+        max-width: 100dvw;
+        display: flex;
+        flex-direction: column;
+
+        #app-top {
+            width: 100%;
+            height: 4dvh;
+            overflow: visible;
+        }
+
+        #app-main {
+            height: 97dvh;
+            width: 100%;
+            display: flex;
+
+            gap: 0.5dvh;
+            box-sizing: border-box;
+
+            .main-content {
+                width: 100%;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+
+                box-sizing: border-box;
+
+                gap: 0.5dvh;
+            }
+        }
+    }
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 30px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 4px;
+    display: flex;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+::-webkit-scrollbar-corner {
+    background: transparent;
+}

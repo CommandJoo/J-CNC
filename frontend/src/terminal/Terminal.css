@@ -1,0 +1,36 @@
+#terminal {
+    background: var(--bg);
+    width: 100%;
+    min-height: 22dvh;
+    height: 22dvh;
+
+    border-radius: var(--border-radius-big);
+    display: flex;
+    flex-direction: column;
+
+    #output {
+        height: 19dvh;
+        overflow-y: scroll;
+        scrollbar-width: thin;
+        .line {
+
+        }
+        padding: 1dvh;
+        box-sizing: border-box;
+    }
+    #command {
+        height: 3dvh;
+        border: none;
+        outline: none;
+
+        padding: 0.5dvh;
+        font-size: 1.1rem;
+        vertical-align: center;
+        box-sizing: border-box;
+        background: var(--bg-light);
+
+        &:focus {
+            background: var(--bg-highlight);
+        }
+    }
+}

@@ -29,8 +29,16 @@ public enum CncFirmware {
         port.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 2000, 0);
 
         if(!port.openPort()) return null;
+
         try {
+            port.clearDTR();
+            Thread.sleep(200);
+            port.setDTR();
             Thread.sleep(2000);
+            byte[] buf = new byte[256];
+            int read = port.readBytes(buf, buf.length);
+            System.out.println("[grbl] Raw bytes read: " + read);
+            System.out.println("[grbl] Raw: " + new String(buf, 0, Math.max(read, 0)));
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
