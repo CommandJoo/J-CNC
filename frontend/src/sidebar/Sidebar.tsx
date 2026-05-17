@@ -18,6 +18,7 @@ export type ButtonType = {
     gcode1: string;
     gcode2?: string;
     isToggle: boolean;
+    id: number;
 }
 
 function AddButtonModal() {
@@ -43,7 +44,7 @@ function AddButtonModal() {
             gcode2Ref.current.value = "";
         }
 
-        addButton({text, gcode1, gcode2, isToggle: mode});
+        addButton({text, gcode1, gcode2, isToggle: mode, id: Math.random()*10000});
         close();
     }
 
@@ -78,10 +79,16 @@ function AddButtonModal() {
 }
 
 export function ButtonEntry(props: { type: ButtonType }) {
-    const {sendLine} = useGRBL();
+    const {sendLine, removeButton} = useGRBL();
     const [toggled, setToggled] = useState<boolean>(false);
+    const {handleContextMenu, close} = useContextMenu();
 
-    return <div className={"btn"+(toggled ? " toggled" : "")} onClick={() => {
+    return <div onContextMenu={(e) => {
+        handleContextMenu(e, <button onClick={() => {
+            removeButton(props.type.id);
+            close();
+        }}>Delete</button>)
+    }} className={"btn"+(toggled ? " toggled" : "")} onClick={() => {
         if(props.type.isToggle) {
             if(toggled && props.type.gcode2) {
                 for (const line of props.type.gcode2.split("\n")) {
@@ -107,7 +114,7 @@ export function ButtonEntry(props: { type: ButtonType }) {
 export default function Sidebar() {
     const {showModal} = useModal();
     const {buttons} = useGRBL();
-    const {handleContextMenu} = useContextMenu();
+    const {handleContextMenu, close} = useContextMenu();
     return <div id={"sidebar"}>
         <div id={"sidebar-port-panel"}>
             <Dropdown icon={<></>} text={"Port"} id={"port"}>
@@ -116,17 +123,13 @@ export default function Sidebar() {
             </Dropdown>
         </div>
         <div id={"sidebar-buttons"} onContextMenu={(e) => {
-            handleContextMenu(e, <div>
-                Hello World
-            </div>)
+            handleContextMenu(e,
+                <button onClick={() => {
+                    showModal(<AddButtonModal/>)
+                    close();
+                }}>Add Custom Button</button>
+            )
         }}>
-            <div key={-1} className={"btn"} onClick={() => {
-                showModal(
-                    <AddButtonModal/>
-                )
-            }}>
-                <Icons.IoAdd/>
-            </div>
             {
                 buttons.map((button, i) => {
                     return <ButtonEntry key={i} type={button}/>

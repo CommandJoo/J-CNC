@@ -10,6 +10,7 @@ type GRBLContextType = {
     setTheme: (theme: ThemeType) => void;
     buttons: ButtonType[];
     addButton: (buttonType: ButtonType) => void;
+    removeButton: (id: number) => void;
 }
 
 export type ThemeType = {
@@ -62,6 +63,9 @@ export function GRBLProvider({ children }: { children: React.ReactNode }) {
     const addButton = (buttonType: ButtonType) => {
         setButtons([...buttons, buttonType])
     }
+    const removeButton = (id: number) => {
+        setButtons(buttons.filter((b) => b.id !== id))
+    }
 
     const sendLine = useCallback((line: string) => {
         setLines(prev => [...prev, line]);
@@ -79,7 +83,8 @@ export function GRBLProvider({ children }: { children: React.ReactNode }) {
             theme,
             setTheme,
             buttons,
-            addButton
+            addButton,
+            removeButton,
         }}>
             <div id={"grbl-context"}>
                 {children}
