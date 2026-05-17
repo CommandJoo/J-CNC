@@ -1,6 +1,6 @@
 import "./Preview.css"
 import {useCallback, useEffect, useRef, useState} from "react";
-import {useGRBL} from "../GRBLContext.tsx";
+import {useGRBL} from "../providers/GRBLContext.tsx";
 
 const WORLD_LIMIT = 1000;
 

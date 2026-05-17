@@ -1,5 +1,5 @@
 import "./DropdownButton.css"
-import {useDropdown} from "./DropdownMenuContext.tsx";
+import {useDropdown} from "../../providers/DropdownMenuContext.tsx";
 
 type DropdownButtonProps = {
     text: string;

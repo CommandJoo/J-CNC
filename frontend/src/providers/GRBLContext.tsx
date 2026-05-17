@@ -1,5 +1,6 @@
 import {createContext, useCallback, useContext, useState} from "react";
-import type {ButtonType} from "./sidebar/Sidebar.tsx";
+import type {ButtonType} from "../sidebar/Sidebar.tsx";
+import "./GRBLContext.css";
 
 type GRBLContextType = {
     lines: string[];
@@ -79,7 +80,9 @@ export function GRBLProvider({ children }: { children: React.ReactNode }) {
             buttons,
             addButton
         }}>
-            {children}
+            <div id={"grbl-context"}>
+                {children}
+            </div>
         </GRBLContext.Provider>
     );
 }

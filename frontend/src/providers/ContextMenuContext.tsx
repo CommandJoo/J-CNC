@@ -1,5 +1,5 @@
 import {createContext, type ReactNode, useContext, useEffect, useState} from "react";
-
+import "./ContextMenuContext.css"
 type ContextMenuState = {
     x: number;
     y: number;
@@ -48,16 +48,18 @@ export function ContextMenuProvider({children}: { children: ReactNode }) {
 
     return (
         <ContextMenuContext.Provider value={{open, close, change, handleContextMenu}}>
-            {children}
-            {menu.content && (
-                <div
-                    style={{position: "fixed", top: menu.y, left: menu.x}}
-                    onClick={(e) => e.stopPropagation()}
-                    id={"context-menu"}
-                >
-                    {menu.content}
-                </div>
-            )}
+            <div id={"context-menu-context"}>
+                {children}
+                {menu.content && (
+                    <div
+                        style={{position: "fixed", top: menu.y, left: menu.x}}
+                        onClick={(e) => e.stopPropagation()}
+                        id={"context-menu"}
+                    >
+                        {menu.content}
+                    </div>
+                )}
+            </div>
         </ContextMenuContext.Provider>
     );
 }

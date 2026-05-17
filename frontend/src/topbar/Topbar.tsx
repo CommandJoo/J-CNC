@@ -3,8 +3,8 @@ import {IoFileTray, IoSettings, IoLanguage, IoHelpCircleSharp} from "react-icons
 import {IoMdMoon} from "react-icons/io";
 import Dropdown from "./comp/Dropdown.tsx";
 import DropdownButton from "./comp/DropdownButton.tsx";
-import {useGRBL} from "../GRBLContext.tsx";
-import {useModal} from "../ModalContext.tsx";
+import {useGRBL} from "../providers/GRBLContext.tsx";
+import {useModal} from "../providers/ModalContext.tsx";
 
 export default function Topbar() {
     const {setTheme} = useGRBL();

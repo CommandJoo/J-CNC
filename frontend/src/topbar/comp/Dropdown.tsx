@@ -1,5 +1,5 @@
 import "./Dropdown.css"
-import {useDropdown} from "./DropdownMenuContext.tsx";
+import {useDropdown} from "../../providers/DropdownMenuContext.tsx";
 
 type DropdownProps = {
     icon: React.ReactNode;

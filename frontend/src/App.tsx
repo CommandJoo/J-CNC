@@ -3,11 +3,11 @@ import Sidebar from "./sidebar/Sidebar.tsx";
 import Preview from "./preview/Preview.tsx";
 import Topbar from "./topbar/Topbar.tsx";
 import Terminal from "./terminal/Terminal.tsx";
-import {GRBLProvider, useGRBL} from "./GRBLContext.tsx";
-import {DropdownProvider, useDropdown} from "./topbar/comp/DropdownMenuContext.tsx";
+import {GRBLProvider, useGRBL} from "./providers/GRBLContext.tsx";
+import {DropdownProvider, useDropdown} from "./providers/DropdownMenuContext.tsx";
 import {useEffect} from "react";
-import {ModalProvider, useModal} from "./ModalContext.tsx";
-import {ContextMenuProvider} from "./ContextMenuContext.tsx";
+import {ModalProvider, useModal} from "./providers/ModalContext.tsx";
+import {ContextMenuProvider} from "./providers/ContextMenuContext.tsx";
 
 function App() {
     useEffect(() => {

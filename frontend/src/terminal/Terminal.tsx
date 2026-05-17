@@ -1,6 +1,6 @@
 import "./Terminal.css"
 import {useEffect} from "react";
-import {useGRBL} from "../GRBLContext.tsx";
+import {useGRBL} from "../providers/GRBLContext.tsx";
 
 export default function Terminal() {
     const grbl = useGRBL();

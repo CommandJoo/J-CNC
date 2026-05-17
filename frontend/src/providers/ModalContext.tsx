@@ -1,5 +1,5 @@
 import {createContext, type ReactElement, useCallback, useContext, useState} from "react";
-
+import "./ModalContext.css"
 export type ModalContextType = {
     showModal: (modal: ReactElement) => void;
     close: () => void;
@@ -16,10 +16,12 @@ export function ModalProvider({children}: {children: ReactElement}) {
     const close = useCallback(() => setModal(null), []);
 
     return <ModalContext.Provider value={{showModal, close, isOpen: modal != null}}>
-        <dialog id={"modal"} open={modal != null}>
-            {modal}
-        </dialog>
-        {children}
+        <div id={"modal-context"}>
+            <dialog id={"modal"} open={modal != null}>
+                {modal}
+            </dialog>
+            {children}
+        </div>
     </ModalContext.Provider>
 }
 

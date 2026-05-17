@@ -3,10 +3,10 @@ import * as IoIcons from "react-icons/io";
 import * as Io5Icons from "react-icons/io5";
 import Dropdown from "../topbar/comp/Dropdown.tsx";
 import DropdownButton from "../topbar/comp/DropdownButton.tsx";
-import {useModal} from "../ModalContext.tsx";
+import {useModal} from "../providers/ModalContext.tsx";
 import {useRef, useState} from "react";
-import {useGRBL} from "../GRBLContext.tsx";
-import {useContextMenu} from "../ContextMenuContext.tsx";
+import {useGRBL} from "../providers/GRBLContext.tsx";
+import {useContextMenu} from "../providers/ContextMenuContext.tsx";
 
 const Icons = {
     ...IoIcons,
