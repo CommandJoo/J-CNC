@@ -1,5 +1,5 @@
 :root {
-    &:has(#root #theme.light) {
+    &[data-theme="light"] {
         --bg-dark: hsl(220, 100%, 90%);
         --bg: hsl(220, 100%, 92%);
         --bg-light: hsl(220, 100%, 95%);
@@ -12,7 +12,7 @@
         --blue: #4444FFDD;
     }
 
-    &:has(#root #theme.dark) {
+    &[data-theme="dark"] {
         --bg-dark: hsl(220, 100%, 3%);
         --bg: hsl(220, 100%, 6%);
         --bg-light: hsl(220, 100%, 10%);
@@ -25,7 +25,7 @@
         --blue: #4444FFDD;
     }
 
-    &:has(#root #theme.dracula) {
+    &[data-theme="dracula"] {
         --bg-dark: hsl(231, 15%, 15%);
         --bg: hsl(232, 14%, 18%);
         --bg-light: hsl(231, 15%, 23%);
@@ -38,7 +38,7 @@
         --blue: #BD93F9;
     }
 
-    &:has(#root #theme.monokai) {
+    &[data-theme="monokai"] {
         --bg-dark: #211F21;
         --bg: #2D2A2E;
         --bg-light: #37343A;

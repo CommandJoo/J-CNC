@@ -61,7 +61,12 @@ public class MainFX extends Application {
         stage.setScene(new Scene(webView, 1200, 800));
         stage.show();
 
-        stage.setOnCloseRequest(e -> console.close());
+        stage.setOnCloseRequest(e -> {
+            try {
+                console.close();
+            } catch(Exception ex) {}
+            System.exit(0);
+        });
     }
 
     static void main(String[] args) {

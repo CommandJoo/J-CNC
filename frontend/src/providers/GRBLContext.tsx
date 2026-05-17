@@ -36,6 +36,7 @@ export function GRBLProvider({ children }: { children: React.ReactNode }) {
                 value instanceof Function ? value(theme) : value;
             setStoredTheme(valueToStore);
             localStorage.setItem("theme", JSON.stringify(valueToStore));
+
         } catch (error) {
             console.error("Error setting localStorage key:", "theme", error);
         }

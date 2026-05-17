@@ -51,7 +51,11 @@ function Themeable() {
         return () => window.removeEventListener("keydown", handler);
     }, [close, current, isOpen, setCurrent]);
 
-    return <div id={"theme"} className={theme.name} tabIndex={-1}>
+    useEffect(() => {
+        document.documentElement.dataset.theme = theme.name;
+    }, [theme]);
+
+    return <div id={"theme"} tabIndex={-1}>
         <div id={"app-top"}>
             <Topbar/>
         </div>
