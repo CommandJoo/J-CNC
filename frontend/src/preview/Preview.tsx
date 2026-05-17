@@ -4,6 +4,8 @@ import {useGRBL} from "../providers/GRBLContext.tsx";
 
 const WORLD_LIMIT = 1000;
 
+type PathCache = { rapid: Path2D; cut: Path2D } | null;
+
 export default function Preview() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const offset = useRef({x: 0, y: 0});
@@ -11,6 +13,8 @@ export default function Preview() {
     const isPanning = useRef(false);
     const lastMouse = useRef({x: 0, y: 0});
     const [cursorPos, setCursorPos] = useState<{ x: number, y: number } | null>(null);
+    const pathCache = useRef<PathCache>(null);
+    const redrawRef = useRef<(() => void) | null>(null);
 
     const grbl = useGRBL();
 
@@ -45,143 +49,137 @@ export default function Preview() {
     };
 
     const drawRulers = useCallback((ctx: CanvasRenderingContext2D, width: number, height: number) => {
-        if(!canvasRef.current) return;
+        if (!canvasRef.current) return;
         const s = scale.current;
         const ox = offset.current.x;
         const oy = offset.current.y;
         const step = getStepSize(s);
 
-        // X: unchanged
-        const worldLeft = -ox / s;
-        const worldRight = (width - ox) / s;
-
-        // Y: flipped — top of screen is positive, bottom is negative
-        const worldTop = oy / s;
+        const worldLeft   = -ox / s;
+        const worldRight  = (width - ox) / s;
+        const worldTop    = oy / s;
         const worldBottom = (oy - height) / s;
 
         const firstX = Math.ceil(worldLeft / step) * step;
-        const firstY = Math.floor(worldTop / step) * step; // start high, count down
+        const firstY = Math.floor(worldTop / step) * step;
 
-        const PAD = 4;
+        const PAD     = 4;
         const EPSILON = step * 0.01;
 
         ctx.save();
         ctx.font = "10px monospace";
 
-        const colorRuler = getCSSVar(canvasRef.current, "--ruler-color");
+        const colorRuler   = getCSSVar(canvasRef.current, "--ruler-color");
         const colorNumbers = getCSSVar(canvasRef.current, "--number-color");
-        const colorUnit = getCSSVar(canvasRef.current, "--unit-color");
-        const colorRed = getCSSVar(canvasRef.current, "--red");
-        const colorBlue = getCSSVar(canvasRef.current, "--blue");
+        const colorUnit    = getCSSVar(canvasRef.current, "--unit-color");
+        const colorRed     = getCSSVar(canvasRef.current, "--red");
+        const colorBlue    = getCSSVar(canvasRef.current, "--blue");
 
-        // vertical grid lines + top/bottom labels (X axis — unchanged)
         for (let wx = firstX; wx <= worldRight; wx += step) {
-            const sx = wx * s + ox;
+            const sx       = wx * s + ox;
             const isOrigin = Math.abs(wx) < EPSILON;
-            const label = isOrigin ? "0" : formatLabel(wx, step);
+            const label    = isOrigin ? "0" : formatLabel(wx, step);
 
             ctx.beginPath();
             ctx.strokeStyle = isOrigin ? colorRed : colorRuler;
-            ctx.lineWidth = isOrigin ? 2 : 1;
+            ctx.lineWidth   = isOrigin ? 2 : 1;
             ctx.moveTo(sx, 0);
             ctx.lineTo(sx, height);
             ctx.stroke();
 
-            ctx.fillStyle = isOrigin ? colorRed : colorNumbers;
+            ctx.fillStyle    = isOrigin ? colorRed : colorNumbers;
             ctx.textBaseline = "top";
-            ctx.textAlign = "left";
+            ctx.textAlign    = "left";
             ctx.fillText(label, sx + PAD, PAD);
             ctx.textBaseline = "bottom";
             ctx.fillText(label, sx + PAD, height - PAD);
         }
 
         for (let wy = firstY; wy >= worldBottom; wy -= step) {
-            const sy = oy - wy * s; // flipped: subtract instead of add
+            const sy       = oy - wy * s;
             const isOrigin = Math.abs(wy) < EPSILON;
-            const label = isOrigin ? "0" : formatLabel(wy, step);
+            const label    = isOrigin ? "0" : formatLabel(wy, step);
 
             ctx.beginPath();
             ctx.strokeStyle = isOrigin ? colorBlue : colorRuler;
-            ctx.lineWidth = isOrigin ? 2 : 1;
+            ctx.lineWidth   = isOrigin ? 2 : 1;
             ctx.moveTo(0, sy);
             ctx.lineTo(width, sy);
             ctx.stroke();
 
-            ctx.fillStyle = isOrigin ? colorBlue : colorNumbers;
+            ctx.fillStyle    = isOrigin ? colorBlue : colorNumbers;
             ctx.textBaseline = "middle";
-            ctx.textAlign = "left";
+            ctx.textAlign    = "left";
             ctx.fillText(label, PAD, sy);
             ctx.textAlign = "right";
             ctx.fillText(label, width - PAD, sy);
         }
 
-        ctx.textAlign = "left";
+        ctx.textAlign    = "left";
         ctx.textBaseline = "bottom";
-        ctx.font = "14px monospace";
-        ctx.fillStyle = colorUnit;
+        ctx.font         = "14px monospace";
+        ctx.fillStyle    = colorUnit;
         ctx.fillText(`${step >= 10 ? "cm" : "mm"}`, PAD, height - PAD);
 
         ctx.restore();
     }, []);
 
-    const draw = useCallback((ctx: CanvasRenderingContext2D) => {
-        ctx.lineWidth = 1 / scale.current;
+    useEffect(() => {
+        const rapid = new Path2D();
+        const cut   = new Path2D();
 
         let cx = 0, cy = 0;
 
+        grbl.lines.forEach((rawLine) => {
+            const line = rawLine.split(";")[0].trim();
+            if (!line) return;
+
+            const parts = line.split(/\s+/);
+            const code  = parts[0].toUpperCase();
+
+            if (code !== "G0" && code !== "G1") return;
+
+            let x = cx, y = cy;
+            let hasXY = false;
+
+            for (let i = 1; i < parts.length; i++) {
+                const seg = parts[i].toUpperCase();
+                if (seg.startsWith("X")) { x = parseFloat(seg.slice(1)); hasXY = true; }
+                else if (seg.startsWith("Y")) { y = parseFloat(seg.slice(1)); hasXY = true; }
+            }
+
+            if (!hasXY) return;
+
+            if (code === "G0") {
+                rapid.moveTo(cx, cy);
+                rapid.lineTo(x, y);
+                cut.moveTo(x, y);
+            } else {
+                cut.lineTo(x, y);
+            }
+
+            cx = x;
+            cy = y;
+        });
+
+        pathCache.current = {rapid, cut};
+
+        redrawRef.current?.();
+    }, [grbl.lines]);
+
+    const draw = useCallback((ctx: CanvasRenderingContext2D) => {
+        if (!pathCache.current) return;
+
+        ctx.lineWidth = 1 / scale.current;
+
         ctx.beginPath();
         ctx.strokeStyle = "rgba(150,150,150,0.4)";
-
-        grbl.lines.forEach((line) => {
-            const cmd = line.trim().split(/\s+/);
-            const code = cmd[0].toUpperCase();
-
-            if (code === "G0" || code === "G1") {
-                let x = cx, y = cy;
-                for (let i = 1; i < cmd.length; i++) {
-                    const seg = cmd[i].toUpperCase();
-                    if (seg.startsWith("X")) x = Number(seg.slice(1));
-                    else if (seg.startsWith("Y")) y = Number(seg.slice(1));
-                }
-
-                if (code === "G0") {
-                    ctx.moveTo(cx, cy);
-                    ctx.lineTo(x, y);
-                }
-
-                cx = x;
-                cy = y;
-            }
-        });
-        ctx.stroke();
-
-        cx = 0; cy = 0;
+        ctx.stroke(pathCache.current.rapid);
 
         ctx.beginPath();
         ctx.strokeStyle = "#F00";
-
-        grbl.lines.forEach((line) => {
-            const cmd = line.trim().split(/\s+/);
-            const code = cmd[0].toUpperCase();
-
-            if (code === "G0" || code === "G1") {
-                let x = cx, y = cy;
-                for (let i = 1; i < cmd.length; i++) {
-                    const seg = cmd[i].toUpperCase();
-                    if (seg.startsWith("X")) x = Number(seg.slice(1));
-                    else if (seg.startsWith("Y")) y = Number(seg.slice(1));
-                }
-
-                if (code === "G0") ctx.moveTo(x, y); // lift pen on rapid
-                else { ctx.moveTo(cx, cy); ctx.lineTo(x, y); }
-
-                cx = x;
-                cy = y;
-            }
-        });
-        ctx.stroke();
-
-    }, [grbl, scale]);
+        ctx.stroke(pathCache.current.cut);
+    }, [scale]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -190,18 +188,16 @@ export default function Preview() {
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
 
-        let width = 0;
-        let height = 0;
-        let dpr = 1;
+        let width    = 0;
+        let height   = 0;
+        let dpr      = 1;
         let minScale = 1;
+        let rafId    = 0;
         const MAX_SCALE = 200;
 
         const redraw = () => {
-            // Clear in real pixel space
             ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Draw in CSS pixel space
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
             ctx.save();
@@ -213,18 +209,20 @@ export default function Preview() {
             drawRulers(ctx, width, height);
         };
 
+        redrawRef.current = redraw;
+
         const resizeCanvas = () => {
             const rect = canvas.getBoundingClientRect();
 
-            const oldWidth = width;
+            const oldWidth  = width;
             const oldHeight = height;
 
-            width = rect.width;
-            height = rect.height;
-            dpr = window.devicePixelRatio || 1;
+            width    = rect.width;
+            height   = rect.height;
+            dpr      = Math.min(window.devicePixelRatio || 1, 1);
             minScale = Math.min(width, height) / (WORLD_LIMIT * 2);
 
-            canvas.width = Math.round(width * dpr);
+            canvas.width  = Math.round(width * dpr);
             canvas.height = Math.round(height * dpr);
 
             if (oldWidth === 0 || oldHeight === 0) {
@@ -236,22 +234,21 @@ export default function Preview() {
 
             scale.current = Math.max(minScale, scale.current);
             clampOffset(width, height);
-
             redraw();
         };
 
         const onMouseDown = (e: MouseEvent) => {
-            isPanning.current = true;
-            lastMouse.current = {x: e.clientX, y: e.clientY};
+            isPanning.current  = true;
+            lastMouse.current  = {x: e.clientX, y: e.clientY};
         };
 
         const onMouseMove = (e: MouseEvent) => {
-            const rect = canvas.getBoundingClientRect();
+            const rect    = canvas.getBoundingClientRect();
             const screenX = e.clientX - rect.left;
             const screenY = e.clientY - rect.top;
 
             setCursorPos({
-                x: (screenX - offset.current.x) / scale.current,
+                x:  (screenX - offset.current.x) / scale.current,
                 y: -(screenY - offset.current.y) / scale.current,
             });
 
@@ -259,77 +256,73 @@ export default function Preview() {
 
             offset.current.x += e.clientX - lastMouse.current.x;
             offset.current.y += e.clientY - lastMouse.current.y;
-
             lastMouse.current = {x: e.clientX, y: e.clientY};
 
             clampOffset(width, height);
-            redraw();
+
+            cancelAnimationFrame(rafId);
+            rafId = requestAnimationFrame(redraw);
         };
 
-        const onMouseUp = () => {
-            isPanning.current = false;
-        };
-
-        const onMouseLeave = () => {
-            isPanning.current = false;
-            setCursorPos(null);
-        };
+        const onMouseUp    = () => { isPanning.current = false; };
+        const onMouseLeave = () => { isPanning.current = false; setCursorPos(null); };
 
         const onWheel = (e: WheelEvent) => {
             e.preventDefault();
 
-            const zoomFactor = 1 - e.deltaY * 0.0003;
+            const rect    = canvas.getBoundingClientRect();
+            const mouseX  = e.clientX - rect.left;
+            const mouseY  = e.clientY - rect.top;
+            const factor  = 1 - e.deltaY * 0.0005;
+            const newScale = Math.min(MAX_SCALE, Math.max(minScale, scale.current * factor));
+            const actual   = newScale / scale.current;
 
-            const rect = canvas.getBoundingClientRect();
-            const mouseX = e.clientX - rect.left;
-            const mouseY = e.clientY - rect.top;
-
-            const newScale = Math.min(
-                MAX_SCALE,
-                Math.max(minScale, scale.current * zoomFactor)
-            );
-
-            const actualFactor = newScale / scale.current;
-            scale.current = newScale;
-
-            offset.current.x = mouseX - (mouseX - offset.current.x) * actualFactor;
-            offset.current.y = mouseY - (mouseY - offset.current.y) * actualFactor;
+            scale.current      = newScale;
+            offset.current.x   = mouseX - (mouseX - offset.current.x) * actual;
+            offset.current.y   = mouseY - (mouseY - offset.current.y) * actual;
 
             clampOffset(width, height);
-            redraw();
+
+            cancelAnimationFrame(rafId);
+            rafId = requestAnimationFrame(redraw);
         };
 
         const resizeObserver = new ResizeObserver(resizeCanvas);
         resizeObserver.observe(canvas);
 
-        canvas.addEventListener("mousedown", onMouseDown);
-        canvas.addEventListener("mousemove", onMouseMove);
-        canvas.addEventListener("mouseup", onMouseUp);
+        canvas.addEventListener("mousedown",  onMouseDown);
+        canvas.addEventListener("mousemove",  onMouseMove);
+        canvas.addEventListener("mouseup",    onMouseUp);
         canvas.addEventListener("mouseleave", onMouseLeave);
-        canvas.addEventListener("wheel", onWheel, {passive: false});
+        canvas.addEventListener("wheel",      onWheel, {passive: false});
 
         resizeCanvas();
 
         return () => {
             resizeObserver.disconnect();
-
-            canvas.removeEventListener("mousedown", onMouseDown);
-            canvas.removeEventListener("mousemove", onMouseMove);
-            canvas.removeEventListener("mouseup", onMouseUp);
+            cancelAnimationFrame(rafId);
+            redrawRef.current = null;
+            canvas.removeEventListener("mousedown",  onMouseDown);
+            canvas.removeEventListener("mousemove",  onMouseMove);
+            canvas.removeEventListener("mouseup",    onMouseUp);
             canvas.removeEventListener("mouseleave", onMouseLeave);
-            canvas.removeEventListener("wheel", onWheel);
+            canvas.removeEventListener("wheel",      onWheel);
         };
     }, [draw, drawRulers]);
 
-    return <div id={"preview"} style={{position: "relative"}}>
-        <canvas ref={canvasRef} id={"canvas"}/>
-        {cursorPos && <div id={"info"}>
-            <div></div>
-            <div>{"X     "}</div>
-            <div>{"Y     "}</div>
-            <div className={"first"}>Cursor</div>
-            <div>{`${(cursorPos.x/10).toFixed(2)}cm`}</div>
-            <div>{`${(cursorPos.y/10).toFixed(2)}cm`}</div>
-        </div>}
-    </div>
+    return (
+        <div id={"preview"} style={{position: "relative"}}>
+            <canvas ref={canvasRef} id={"canvas"}/>
+            {cursorPos && (
+                <div id={"info"}>
+                    <div></div>
+                    <div>{"X     "}</div>
+                    <div>{"Y     "}</div>
+                    <div className={"first"}>Cursor</div>
+                    <div>{`${(cursorPos.x / 10).toFixed(2)}cm`}</div>
+                    <div>{`${(cursorPos.y / 10).toFixed(2)}cm`}</div>
+                </div>
+            )}
+        </div>
+    );
 }

@@ -4,16 +4,37 @@ import {IoMdMoon} from "react-icons/io";
 import Dropdown from "./comp/Dropdown.tsx";
 import DropdownButton from "./comp/DropdownButton.tsx";
 import {useGRBL} from "../providers/GRBLContext.tsx";
-import {useModal} from "../providers/ModalContext.tsx";
+import {useRef, useState} from "react";
 
 export default function Topbar() {
-    const {setTheme} = useGRBL();
-    const {showModal} = useModal();
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [text] = useState("")
+    const {setTheme, sendLine} = useGRBL();
 
     return <div id={"topbar"}>
+        <input onChange={async (e) => {
+            if(!e.target.files) return;
+            const file = e.target.files[0];
+            if(!file) return;
+
+
+            const text = await file.text();
+
+            if ("svg_converter" in window) {
+                const converter = (window.svg_converter) as {convert: (svg: string) => string};
+                const converted = converter.convert(text);
+                converted.split("\n").forEach((line) => {
+                    sendLine(line);
+                })
+            }
+
+        }} type="file" ref={fileInputRef} style={{display: "none"}}/>
+
         <Dropdown icon={<IoFileTray className="icon" size={20}/>} text={"File"} id={"file"}>
             <DropdownButton text={"Open File"} onClick={() => {
-                showModal(<div>Hello World</div>)
+                if(!fileInputRef.current) return;
+                fileInputRef.current.click();
+                // showModal(<div></div>)
             }} closeOnClick/>
             <DropdownButton text={"Reopen File"}/>
             <DropdownButton text={"Exit"}/>
@@ -47,5 +68,8 @@ export default function Topbar() {
             <DropdownButton text={"Opt B"}/>
             <DropdownButton text={"Opt C"}/>
         </Dropdown>
+        <div>
+            {text}
+        </div>
     </div>
 }

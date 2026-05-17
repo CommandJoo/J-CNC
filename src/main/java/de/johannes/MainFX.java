@@ -1,5 +1,6 @@
 package de.johannes;
 
+import de.johannes.cnc.SvgToGcode;
 import de.johannes.cnc.util.CNCConsole;
 import de.johannes.cnc.util.CncFirmware;
 import de.johannes.cnc.util.generator.GRBL;
@@ -30,6 +31,7 @@ public class MainFX extends Application {
 
         this.console = null;
         GRBL grbl = null;
+        SvgToGcode svg = new SvgToGcode(new GRBL(null));
         try {
             this.console = new CNCConsole(CncFirmware.GRBL.bindPort("/dev/ttyUSB0"));
             grbl = new GRBL(this.console);
@@ -40,6 +42,7 @@ public class MainFX extends Application {
             if (state == Worker.State.SUCCEEDED) {
                 JSObject window = (JSObject) engine.executeScript("window");
                 window.setMember("gconsole", console);
+                window.setMember("svg_converter", svg);
 
                 console.setOnResponse(line -> {
                     Platform.runLater(() -> {

@@ -69,10 +69,10 @@ export function GRBLProvider({ children }: { children: React.ReactNode }) {
 
     const sendLine = useCallback((line: string) => {
         setLines(prev => [...prev, line]);
-        if ("gconsole" in window) {
-            const gc = window.gconsole as { sendLine: (gcode: string) => void };
-            gc.sendLine(line);
-        }
+        // if ("gconsole" in window) {
+        //     const gc = window.gconsole as { sendLine: (gcode: string) => void };
+        //     gc.sendLine(line);
+        // }
     }, []);
 
     return (
