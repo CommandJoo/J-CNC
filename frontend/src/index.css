@@ -36,6 +36,7 @@ html {
   font-weight: 500;
   -webkit-appearance: none;
   appearance: none;
+  user-select: none;
 }
 
 body {

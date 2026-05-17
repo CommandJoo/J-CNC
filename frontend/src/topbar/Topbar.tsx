@@ -12,11 +12,11 @@ export default function Topbar() {
 
     return <div id={"topbar"}>
         <Dropdown icon={<IoFileTray className="icon" size={20}/>} text={"File"} id={"file"}>
-            <DropdownButton text={"Opt A"} onClick={() => {
+            <DropdownButton text={"Open File"} onClick={() => {
                 showModal(<div>Hello World</div>)
             }} closeOnClick/>
-            <DropdownButton text={"Opt B"}/>
-            <DropdownButton text={"Opt C"}/>
+            <DropdownButton text={"Reopen File"}/>
+            <DropdownButton text={"Exit"}/>
         </Dropdown>
         <Dropdown icon={<IoSettings className="icon" size={20}/>} text={"Settings"} id={"settings"}>
             <DropdownButton text={"Opt A"}/>

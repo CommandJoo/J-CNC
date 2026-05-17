@@ -19,12 +19,15 @@ export type ButtonType = {
     gcode2?: string;
     isToggle: boolean;
     id: number;
+    icon: string;
 }
 
 function AddButtonModal() {
     const {close} = useModal();
     const [mode, setMode] = useState<boolean>(false);
     const {addButton} = useGRBL();
+    const [icon, setIcon] = useState<string>("");
+    const [choosingIcon, setChoosingIcon] = useState(false);
 
     const textRef = useRef<HTMLInputElement>(null);
     const gcode1Ref = useRef<HTMLTextAreaElement>(null);
@@ -44,31 +47,56 @@ function AddButtonModal() {
             gcode2Ref.current.value = "";
         }
 
-        addButton({text, gcode1, gcode2, isToggle: mode, id: Math.random()*10000});
+        addButton({text, gcode1, gcode2, isToggle: mode, id: Math.random()*10000, icon});
         close();
     }
 
+    const entry = Object.entries(Icons).find(([name]) => icon === name);
+
     return <div id={"add-button"}>
         <div id={"content"}>
-            <h1>Add Button</h1>
-            <h3>Button Text</h3>
-            <input ref={textRef} type={"text"} placeholder={"..."}/>
-            <h3>Button GCode</h3>
-            <div id={"areas"}>
-                <div>
-                    {mode ? <h4>Toggle</h4> : <h4></h4>}
-                    <textarea ref={gcode1Ref} placeholder={"..."}/>
+            <div id={"content-scrollable"}>
+                <h1>Add Button</h1>
+                <div id={"info"}>
+                    <div id={"button-wrapper"}>
+                        <button onClick={() => setChoosingIcon(!choosingIcon)}>
+                            {entry && (() => {
+                                const Component = entry[1] as React.ComponentType;
+                                return <Component />;
+                            })()}
+                        </button>
+                    </div>
+                    <div>
+                        <h3>Button Text</h3>
+                        <input ref={textRef} type={"text"} placeholder={"..."}/>
+                    </div>
                 </div>
-                {mode && <div>
-                    <h4>Untoggle</h4>
-                    <textarea ref={gcode2Ref} placeholder={"..."}/>
-                </div>}
-            </div>
+                {choosingIcon && <div id={"icon-selection"}>
+                    {Object.entries(Icons).map(([name, Icon], i) => {
+                         const Component = Icon;
 
-            <h3>Mode</h3>
-            <div id={"mode"}>
-                <button onClick={() => setMode(false)} className={!mode ? "selected" : ""}>Hold</button>
-                <button onClick={() => setMode(true)} className={mode ? "selected" : ""}>Toggle</button>
+                         return <div key={i} className={"btn"+(icon===name ? " selected" : "")} onClick={() => {
+                            setIcon(name);
+                         }}>
+                             <Component size={"5dvh"} />
+                         </div>;
+                    })}
+                </div>}
+                <h3>Button GCode</h3>
+                <div id={"areas"}>
+                    <div>
+                        <textarea ref={gcode1Ref} placeholder={"GCode"}/>
+                    </div>
+                    {mode && <div>
+                        <textarea ref={gcode2Ref} placeholder={"Gcode Toggle off"}/>
+                    </div>}
+                </div>
+
+                <h3>Mode</h3>
+                <div id={"mode"}>
+                    <button onClick={() => setMode(false)} className={!mode ? "selected" : ""}>Hold</button>
+                    <button onClick={() => setMode(true)} className={mode ? "selected" : ""}>Toggle</button>
+                </div>
             </div>
         </div>
         <div id={"submit"}>
@@ -82,6 +110,8 @@ export function ButtonEntry(props: { type: ButtonType }) {
     const {sendLine, removeButton} = useGRBL();
     const [toggled, setToggled] = useState<boolean>(false);
     const {handleContextMenu, close} = useContextMenu();
+
+    const entry = Object.entries(Icons).find(([name]) => props.type.icon === name);
 
     return <div onContextMenu={(e) => {
         handleContextMenu(e, <button onClick={() => {
@@ -106,7 +136,10 @@ export function ButtonEntry(props: { type: ButtonType }) {
             }
         }
     }}>
-        <Icons.IoInformation/>
+        {entry && (() => {
+            const Component = entry[1] as React.ComponentType;
+            return <Component />;
+        })()}
         <div>{props.type.text}</div>
     </div>;
 }
@@ -115,12 +148,24 @@ export default function Sidebar() {
     const {showModal} = useModal();
     const {buttons} = useGRBL();
     const {handleContextMenu, close} = useContextMenu();
+
+    const baudrates = [110, 300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 38400, 57600, 115200, 128000, 230400, 256000, 460800, 921600]
+
     return <div id={"sidebar"}>
         <div id={"sidebar-port-panel"}>
-            <Dropdown icon={<></>} text={"Port"} id={"port"}>
-                <DropdownButton text={"Port 1"} closeOnClick={true}/>
-                <DropdownButton text={"Port 2"} closeOnClick={true}/>
-            </Dropdown>
+            <div id={"cnc-settings"}>
+                <Dropdown icon={<></>} text={"Port"} id={"port"}>
+                    <DropdownButton text={"Port 1"} closeOnClick={true}/>
+                    <DropdownButton text={"Port 2"} closeOnClick={true}/>
+                </Dropdown>
+                <Dropdown icon={<></>} text={"Baud Rate"} id={"baud"}>
+                    {baudrates.map((b, i) => {
+                        return <DropdownButton key={i} text={b.toString()} closeOnClick onClick={() => {
+
+                        }}/>
+                    })}
+                </Dropdown>
+            </div>
         </div>
         <div id={"sidebar-buttons"} onContextMenu={(e) => {
             handleContextMenu(e,
@@ -134,16 +179,6 @@ export default function Sidebar() {
                 buttons.map((button, i) => {
                     return <ButtonEntry key={i} type={button}/>
                 })
-            }
-            {
-                // Object.entries(Icons).map(([name, Icon], i) => {
-                //     const Component = Icon;
-                //
-                //     return <div key={i} className={"btn"}>
-                //         <Component />
-                //         <div>{name}</div>
-                //     </div>;
-                // })
             }
         </div>
     </div>
