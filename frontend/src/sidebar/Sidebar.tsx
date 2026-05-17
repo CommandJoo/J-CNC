@@ -6,6 +6,7 @@ import DropdownButton from "../topbar/comp/DropdownButton.tsx";
 import {useModal} from "../ModalContext.tsx";
 import {useRef, useState} from "react";
 import {useGRBL} from "../GRBLContext.tsx";
+import {useContextMenu} from "../ContextMenuContext.tsx";
 
 const Icons = {
     ...IoIcons,
@@ -106,6 +107,7 @@ export function ButtonEntry(props: { type: ButtonType }) {
 export default function Sidebar() {
     const {showModal} = useModal();
     const {buttons} = useGRBL();
+    const {handleContextMenu} = useContextMenu();
     return <div id={"sidebar"}>
         <div id={"sidebar-port-panel"}>
             <Dropdown icon={<></>} text={"Port"} id={"port"}>
@@ -113,7 +115,11 @@ export default function Sidebar() {
                 <DropdownButton text={"Port 2"} closeOnClick={true}/>
             </Dropdown>
         </div>
-        <div id={"sidebar-buttons"}>
+        <div id={"sidebar-buttons"} onContextMenu={(e) => {
+            handleContextMenu(e, <div>
+                Hello World
+            </div>)
+        }}>
             <div key={-1} className={"btn"} onClick={() => {
                 showModal(
                     <AddButtonModal/>

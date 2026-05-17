@@ -7,14 +7,25 @@ import {GRBLProvider, useGRBL} from "./GRBLContext.tsx";
 import {DropdownProvider, useDropdown} from "./topbar/comp/DropdownMenuContext.tsx";
 import {useEffect} from "react";
 import {ModalProvider, useModal} from "./ModalContext.tsx";
+import {ContextMenuProvider} from "./ContextMenuContext.tsx";
 
 function App() {
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            e.preventDefault();
+        }
+        window.addEventListener("contextmenu", handler)
+        return () => window.removeEventListener("contextmenu", handler);
+    }, []);
+
     return <GRBLProvider>
-        <ModalProvider>
-            <DropdownProvider>
-                <Themeable/>
-            </DropdownProvider>
-        </ModalProvider>
+        <ContextMenuProvider>
+            <ModalProvider>
+                <DropdownProvider>
+                    <Themeable/>
+                </DropdownProvider>
+            </ModalProvider>
+        </ContextMenuProvider>
     </GRBLProvider>
 }
 

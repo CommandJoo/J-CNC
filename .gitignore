@@ -71,3 +71,5 @@ frontend/*.sln
 frontend/*.sw?
 
 jcef-bundle
+
+src/main/resources/web

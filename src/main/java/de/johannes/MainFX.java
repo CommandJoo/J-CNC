@@ -28,9 +28,14 @@ public class MainFX extends Application {
         WebView webView = new WebView();
         WebEngine engine = webView.getEngine();
 
-        this.console = new CNCConsole(CncFirmware.GRBL.bindPort("/dev/ttyUSB0"));
-        GRBL grbl = new GRBL(this.console);
-        grbl.init(GRBL.Units.METRIC, GRBL.DistanceMode.ABSOLUTE, GRBL.Plane.XY);
+        this.console = null;
+        GRBL grbl = null;
+        try {
+            this.console = new CNCConsole(CncFirmware.GRBL.bindPort("/dev/ttyUSB0"));
+            grbl = new GRBL(this.console);
+            grbl.init(GRBL.Units.METRIC, GRBL.DistanceMode.ABSOLUTE, GRBL.Plane.XY);
+        } catch(Exception ex) {
+        }
         engine.getLoadWorker().stateProperty().addListener((obs, old, state) -> {
             if (state == Worker.State.SUCCEEDED) {
                 JSObject window = (JSObject) engine.executeScript("window");
