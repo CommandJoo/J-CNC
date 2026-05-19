@@ -82,6 +82,7 @@ export function UIContextProvider({children}: { children: ReactElement }) {
     </UIContext.Provider>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useUI() {
     const ctx = useContext(UIContext);
 

@@ -130,27 +130,36 @@ export default function Preview() {
 
         let cx = 0, cy = 0;
 
-        grbl.lines.forEach((rawLine) => {
-            const line = rawLine.split(";")[0].trim();
+        grbl.buffer.forEach((gcodeLine) => {
+            if (gcodeLine.type !== "command") return;
+
+            const line = gcodeLine.raw.split(";")[0].trim();
             if (!line) return;
 
             const parts = line.split(/\s+/);
             const code  = parts[0].toUpperCase();
 
-            if (code !== "G0" && code !== "G1") return;
+            if (code !== "G0" && code !== "G1" && code !== "G00" && code !== "G01") return;
 
-            let x = cx, y = cy;
+            let x = cx;
+            let y = cy;
             let hasXY = false;
 
             for (let i = 1; i < parts.length; i++) {
                 const seg = parts[i].toUpperCase();
-                if (seg.startsWith("X")) { x = parseFloat(seg.slice(1)); hasXY = true; }
-                else if (seg.startsWith("Y")) { y = parseFloat(seg.slice(1)); hasXY = true; }
+
+                if (seg.startsWith("X")) {
+                    x = parseFloat(seg.slice(1));
+                    hasXY = true;
+                } else if (seg.startsWith("Y")) {
+                    y = parseFloat(seg.slice(1));
+                    hasXY = true;
+                }
             }
 
             if (!hasXY) return;
 
-            if (code === "G0") {
+            if (code === "G0" || code === "G00") {
                 rapid.moveTo(cx, cy);
                 rapid.lineTo(x, y);
                 cut.moveTo(x, y);
@@ -162,10 +171,9 @@ export default function Preview() {
             cy = y;
         });
 
-        pathCache.current = {rapid, cut};
-
+        pathCache.current = { rapid, cut };
         redrawRef.current?.();
-    }, [grbl.lines]);
+    }, [grbl.buffer]);
 
     const draw = useCallback((ctx: CanvasRenderingContext2D) => {
         if (!pathCache.current) return;

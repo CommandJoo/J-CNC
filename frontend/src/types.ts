@@ -13,7 +13,7 @@ export type Theme = {
 }
 
 export type CNC = {
-    console: () => Console;
+    console: () => Console|null;
     converter: () => SvgConverter;
 
     connect: (port: string, baudrate: number) => void;
@@ -30,6 +30,6 @@ export type SvgConverter = {
 }
 
 export type PortInfo = {
-    name: string;
-    path: string;
+    name: () => string;
+    path: () => string;
 }

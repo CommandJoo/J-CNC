@@ -1,29 +1,46 @@
-import "./Terminal.css"
-import {useEffect} from "react";
-import {useGRBL} from "../providers/GRBLContext.tsx";
+import "./Terminal.css";
+import { useGRBL } from "../providers/GRBLContext.tsx";
 
 export default function Terminal() {
     const grbl = useGRBL();
 
-    useEffect(() => {
-        (window as any).onGrblResponse = (line: string) => {
-            grbl.setLines([...grbl.lines, "< "+line]);
-        };
-        return () => { delete (window as any).onGrblResponse; };
-    }, [grbl]);
+    return (
+        <div id="terminal">
+            <div id="output">
+                {grbl.log.map(entry => {
+                    return (
+                        <div
+                            className={`line ${entry.direction}`}
+                            key={entry.id}
+                        >
+                            {entry.direction === "in" && "< "}
+                            {entry.direction === "out" && "> "}
+                            {entry.direction === "system" && "* "}
 
-    return <div id={"terminal"}>
-        <div id={"output"}>
-            {grbl.lines.map((line, i) => {
-                return <div className={"line"} key={i}>{line}</div>
-            })}
+                            {entry.text}
+                        </div>
+                    );
+                })}
+            </div>
+
+            <input
+                id="command"
+                placeholder="Type GCode..."
+                type="text"
+                onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                        const line = e.currentTarget.value.trim();
+
+                        if (line.length === 0) {
+                            return;
+                        }
+
+                        e.currentTarget.value = "";
+
+                        grbl.sendLine(line);
+                    }
+                }}
+            />
         </div>
-        <input id={"command"} placeholder={"Type GCode..."} type={"text"} onKeyDown={(e) => {
-            if(e.key === "Enter") {
-                const line = e.currentTarget.value;
-                e.currentTarget.value = "";
-                grbl.sendLine(line);
-            }
-        }}/>
-    </div>
+    );
 }

@@ -9,6 +9,7 @@ import {useGRBL} from "../providers/GRBLContext.tsx";
 import {useContextMenu} from "../providers/ContextMenuContext.tsx";
 import {useUI} from "../providers/UIContext.tsx";
 import type {ButtonType} from "../types.ts";
+import { PiPlugsConnectedLight, PiPlugsLight } from "react-icons/pi";
 
 const Icons = {
     ...IoIcons,
@@ -143,6 +144,7 @@ export default function Sidebar() {
     const {showModal} = useModal();
     const {buttons} = useUI();
     const {handleContextMenu, close} = useContextMenu();
+    const [connected, setConnected] = useState(false);
 
     const baudrates = [110, 300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 38400, 57600, 115200, 128000, 230400, 256000, 460800, 921600]
 
@@ -160,6 +162,9 @@ export default function Sidebar() {
                         }}/>
                     })}
                 </Dropdown>
+                <button className={"btn"} onClick={() => setConnected(!connected)}>
+                    {!connected ? <PiPlugsLight/> : <PiPlugsConnectedLight/>}
+                </button>
             </div>
         </div>
         <div id={"sidebar-buttons"} onContextMenu={(e) => {
