@@ -3,7 +3,7 @@ name: Release JAR
 on:
   push:
     tags:
-      - "v*"
+      - "*"
 
 permissions:
   contents: write
