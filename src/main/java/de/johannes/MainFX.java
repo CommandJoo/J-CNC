@@ -1,9 +1,8 @@
 package de.johannes;
 
 import de.johannes.cnc.SvgToGcode;
-import de.johannes.cnc.util.CNCConsole;
-import de.johannes.cnc.util.CncFirmware;
-import de.johannes.cnc.util.generator.GRBL;
+import de.johannes.cnc.Console;
+import de.johannes.cnc.Firmware;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.concurrent.Worker;
@@ -15,7 +14,7 @@ import netscape.javascript.JSObject;
 
 public class MainFX extends Application {
 
-    private CNCConsole console;
+    private Console console;
 
     private String escapeJs(String s) {
         return "'" + s.replace("\\", "\\\\")
@@ -30,12 +29,9 @@ public class MainFX extends Application {
         WebEngine engine = webView.getEngine();
 
         this.console = null;
-        GRBL grbl = null;
-        SvgToGcode svg = new SvgToGcode(new GRBL(null));
+        SvgToGcode svg = new SvgToGcode();
         try {
-            this.console = new CNCConsole(CncFirmware.GRBL.bindPort("/dev/ttyUSB0"));
-            grbl = new GRBL(this.console);
-            grbl.init(GRBL.Units.METRIC, GRBL.DistanceMode.ABSOLUTE, GRBL.Plane.XY);
+            this.console = new Console(Firmware.GRBL.bindPort("/dev/ttyUSB0"));
         } catch(Exception ex) {
         }
         engine.getLoadWorker().stateProperty().addListener((obs, old, state) -> {
@@ -43,6 +39,8 @@ public class MainFX extends Application {
                 JSObject window = (JSObject) engine.executeScript("window");
                 window.setMember("gconsole", console);
                 window.setMember("svg_converter", svg);
+
+
 
                 console.setOnResponse(line -> {
                     Platform.runLater(() -> {

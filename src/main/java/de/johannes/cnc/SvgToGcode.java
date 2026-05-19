@@ -1,6 +1,5 @@
 package de.johannes.cnc;
 
-import de.johannes.cnc.util.generator.GRBL;
 import org.w3c.dom.*;
 import javax.xml.parsers.*;
 import java.io.*;
@@ -20,8 +19,7 @@ public class SvgToGcode {
     public void setCutZ(double cutZ)              { this.cutZ = cutZ; }
     public void setPxToMm(double pxToMm)          { this.pxToMm = pxToMm; }
 
-    public SvgToGcode(GRBL grbl) {
-        this.feedRate = grbl.feedRate();
+    public SvgToGcode() {
     }
 
     public String convert(String svg) throws Exception {

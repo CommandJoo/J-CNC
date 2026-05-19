@@ -5,6 +5,7 @@ import Dropdown from "./comp/Dropdown.tsx";
 import DropdownButton from "./comp/DropdownButton.tsx";
 import {useGRBL} from "../providers/GRBLContext.tsx";
 import {useRef, useState} from "react";
+import type {SvgConverter} from "../types.ts";
 
 export default function Topbar() {
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -21,7 +22,7 @@ export default function Topbar() {
             const text = await file.text();
 
             if ("svg_converter" in window) {
-                const converter = (window.svg_converter) as {convert: (svg: string) => string};
+                const converter = (window.svg_converter) as SvgConverter;
                 const converted = converter.convert(text);
                 converted.split("\n").forEach((line) => {
                     sendLine(line);

@@ -3,11 +3,12 @@ import Sidebar from "./sidebar/Sidebar.tsx";
 import Preview from "./preview/Preview.tsx";
 import Topbar from "./topbar/Topbar.tsx";
 import Terminal from "./terminal/Terminal.tsx";
-import {GRBLProvider, useGRBL} from "./providers/GRBLContext.tsx";
+import {GRBLProvider} from "./providers/GRBLContext.tsx";
 import {DropdownProvider, useDropdown} from "./providers/DropdownMenuContext.tsx";
 import {useEffect} from "react";
 import {ModalProvider, useModal} from "./providers/ModalContext.tsx";
 import {ContextMenuProvider} from "./providers/ContextMenuContext.tsx";
+import {UIContextProvider} from "./providers/UIContext.tsx";
 
 function App() {
     useEffect(() => {
@@ -18,19 +19,20 @@ function App() {
         return () => window.removeEventListener("contextmenu", handler);
     }, []);
 
-    return <GRBLProvider>
-        <ContextMenuProvider>
-            <ModalProvider>
-                <DropdownProvider>
-                    <Themeable/>
-                </DropdownProvider>
-            </ModalProvider>
-        </ContextMenuProvider>
-    </GRBLProvider>
+    return <UIContextProvider>
+        <GRBLProvider>
+            <ContextMenuProvider>
+                <ModalProvider>
+                    <DropdownProvider>
+                        <BaseApp/>
+                    </DropdownProvider>
+                </ModalProvider>
+            </ContextMenuProvider>
+        </GRBLProvider>
+    </UIContextProvider>
 }
 
-function Themeable() {
-    const {theme} = useGRBL();
+function BaseApp() {
     const {setCurrent, current} = useDropdown();
     const {isOpen, close} = useModal();
 
@@ -38,10 +40,9 @@ function Themeable() {
         const handler = (e: KeyboardEvent) => {
             if (e.key === "Escape") {
                 e.preventDefault();
-                if(isOpen) {
+                if (isOpen) {
                     close();
-                }
-                else if(current != null) {
+                } else if (current != null) {
                     setCurrent(null);
                 }
 
@@ -51,11 +52,7 @@ function Themeable() {
         return () => window.removeEventListener("keydown", handler);
     }, [close, current, isOpen, setCurrent]);
 
-    useEffect(() => {
-        document.documentElement.dataset.theme = theme.name;
-    }, [theme]);
-
-    return <div id={"theme"} tabIndex={-1}>
+    return <div id={"app"}>
         <div id={"app-top"}>
             <Topbar/>
         </div>

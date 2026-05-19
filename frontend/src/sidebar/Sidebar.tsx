@@ -7,25 +7,19 @@ import {useModal} from "../providers/ModalContext.tsx";
 import {useRef, useState} from "react";
 import {useGRBL} from "../providers/GRBLContext.tsx";
 import {useContextMenu} from "../providers/ContextMenuContext.tsx";
+import {useUI} from "../providers/UIContext.tsx";
+import type {ButtonType} from "../types.ts";
 
 const Icons = {
     ...IoIcons,
     ...Io5Icons
 }
 
-export type ButtonType = {
-    text: string;
-    gcode1: string;
-    gcode2?: string;
-    isToggle: boolean;
-    id: number;
-    icon: string;
-}
-
 function AddButtonModal() {
     const {close} = useModal();
+    const {addButton} = useUI();
+
     const [mode, setMode] = useState<boolean>(false);
-    const {addButton} = useGRBL();
     const [icon, setIcon] = useState<string>("");
     const [choosingIcon, setChoosingIcon] = useState(false);
 
@@ -107,7 +101,8 @@ function AddButtonModal() {
 }
 
 export function ButtonEntry(props: { type: ButtonType }) {
-    const {sendLine, removeButton} = useGRBL();
+    const {sendLine} = useGRBL();
+    const {removeButton} = useUI();
     const [toggled, setToggled] = useState<boolean>(false);
     const {handleContextMenu, close} = useContextMenu();
 
@@ -146,7 +141,7 @@ export function ButtonEntry(props: { type: ButtonType }) {
 
 export default function Sidebar() {
     const {showModal} = useModal();
-    const {buttons} = useGRBL();
+    const {buttons} = useUI();
     const {handleContextMenu, close} = useContextMenu();
 
     const baudrates = [110, 300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 38400, 57600, 115200, 128000, 230400, 256000, 460800, 921600]

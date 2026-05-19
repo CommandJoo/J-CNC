@@ -10,7 +10,7 @@ export default function Terminal() {
             grbl.setLines([...grbl.lines, "< "+line]);
         };
         return () => { delete (window as any).onGrblResponse; };
-    }, []);
+    }, [grbl]);
 
     return <div id={"terminal"}>
         <div id={"output"}>

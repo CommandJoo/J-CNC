@@ -1,4 +1,4 @@
-package de.johannes.cnc.util;
+package de.johannes.cnc;
 
 import com.fazecast.jSerialComm.SerialPort;
 
@@ -6,7 +6,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.regex.Pattern;
 
-public enum CncFirmware {
+public enum Firmware {
 
     GRBL(115200, Pattern.compile("Grbl \\d")),
     MARLIN(250000, Pattern.compile("FIRMWARE_NAME:Marlin")),
@@ -18,14 +18,18 @@ public enum CncFirmware {
     private final int     baudRate;
     private final Pattern handshakePattern;
 
-    CncFirmware(int baudRate, Pattern handshakePattern) {
+    Firmware(int baudRate, Pattern handshakePattern) {
         this.baudRate = baudRate;
         this.handshakePattern = handshakePattern;
     }
 
     public SerialPort bindPort(String portName) {
+        return bindPort(portName, this.baudRate);
+    }
+
+    public static SerialPort bindPort(String portName, int baudRate) {
         SerialPort port = SerialPort.getCommPort(portName);
-        port.setBaudRate(this.baudRate);
+        port.setBaudRate(baudRate);
         port.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 2000, 0);
 
         if(!port.openPort()) return null;
@@ -47,7 +51,7 @@ public enum CncFirmware {
     }
 
     public static SerialPort detectFirmware(String portName) {
-        for (CncFirmware firmware : CncFirmware.values()) {
+        for (Firmware firmware : Firmware.values()) {
             SerialPort port = SerialPort.getCommPort(portName);
             port.setBaudRate(firmware.baudRate);
             port.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 2000, 0);

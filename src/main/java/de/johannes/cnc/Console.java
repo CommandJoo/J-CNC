@@ -1,11 +1,11 @@
-package de.johannes.cnc.util;
+package de.johannes.cnc;
 
 import com.fazecast.jSerialComm.SerialPort;
 
 import java.io.*;
 import java.util.function.Consumer;
 
-public class CNCConsole implements Closeable {
+public class Console implements Closeable {
 
     private final SerialPort        serialPort;
     private final PrintWriter       writer;
@@ -14,7 +14,7 @@ public class CNCConsole implements Closeable {
 
     private Consumer<String> onResponse = line -> {};
 
-    public CNCConsole(SerialPort port) {
+    public Console(SerialPort port) {
         this.serialPort = port;
         if (!port.isOpen()) {
             throw new RuntimeException("Port must be open before being sent to CNC-Console");
