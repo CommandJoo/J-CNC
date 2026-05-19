@@ -111,8 +111,8 @@ tasks.register("releaseVersion") {
             ?: throw GradleException("No version property found")
 
         runCommand("git", "add", "gradle.properties")
-//        runCommand("git", "commit", "-m", "Release $newVersion")
-//        runCommand("git", "push", "origin", "main")
+        runCommand("git", "commit", "-m", "Release $newVersion")
+        runCommand("git", "push", "origin", "main")
         runCommand("git", "tag", "-a", newVersion, "-m", "Release $newVersion")
         runCommand("git", "push", "origin", newVersion)
 
