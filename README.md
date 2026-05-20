@@ -14,12 +14,6 @@ cd ..
 ```
 
 ## TODO
-### Connection logic/ui:
-- port selection
-- baudrate selection
-- connect/disconnect buttons
-- connection status
-
 ### Job execution:
 - start button
 - pause/resume button

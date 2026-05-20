@@ -1,7 +1,7 @@
 import "./Topbar.css";
 import {IoFileTray, IoSettings, IoLanguage, IoHelpCircleSharp} from "react-icons/io5";
 import {IoMdMoon} from "react-icons/io";
-import Dropdown from "./comp/Dropdown.tsx";
+import {Dropdown} from "./comp/Dropdown.tsx";
 import DropdownButton from "./comp/DropdownButton.tsx";
 import {useGRBL} from "../providers/GRBLContext.tsx";
 import {useRef} from "react";

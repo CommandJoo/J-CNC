@@ -26,12 +26,8 @@ public class MainFX extends Application {
         WebView webView = new WebView();
         WebEngine engine = webView.getEngine();
 
-        for (SerialPort commPort : SerialPort.getCommPorts()) {
-            System.out.println(commPort.getSystemPortPath());
-        }
-
         CNC cnc = new CNC(engine);
-        cnc.connect("/dev/ttyUSB0", 115200);
+//        cnc.connect("/dev/ttyUSB0", 115200);
 
         engine.getLoadWorker().stateProperty().addListener((obs, old, state) -> {
             if (state == Worker.State.SUCCEEDED) {

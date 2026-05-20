@@ -62,7 +62,13 @@
 
                 border: none;
                 outline: none;
+
+                background: var(--bg-light);
                 border-radius: 4px;
+
+                &:hover {
+                    background: var(--bg-highlight);
+                }
             }
         }
     }

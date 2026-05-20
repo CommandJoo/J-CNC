@@ -30,6 +30,6 @@ export type SvgConverter = {
 }
 
 export type PortInfo = {
-    name: () => string;
-    path: () => string;
+    name: string;
+    path: string;
 }

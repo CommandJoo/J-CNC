@@ -67,7 +67,7 @@ type GRBLContextType = {
     log: ConsoleEntry[];
 
     refreshPorts: () => void;
-    connect: () => void;
+    connect: (path: string, rate: number) => void;
     disconnect: () => void;
 
     sendLine: (line: string) => void;
@@ -170,7 +170,7 @@ export function GRBLProvider({children}: { children: React.ReactNode }) {
         setPorts(mappedPorts);
     }, [addLog]);
 
-    const connect = useCallback(() => {
+    const connect = useCallback((portOverride?: string, baudrateOverride?: number) => {
         const bridge = getCNC();
 
         if (!bridge) {
@@ -178,16 +178,19 @@ export function GRBLProvider({children}: { children: React.ReactNode }) {
             return;
         }
 
-        if (!selectedPort) {
+        const portToUse = portOverride ?? selectedPort;
+        const baudToUse = baudrateOverride ?? baudrate;
+
+        if (!portToUse) {
             addLog("system", "No port selected");
             return;
         }
 
-        bridge.connect(selectedPort, baudrate);
+        bridge.connect(portToUse, baudToUse);
 
         setConnected(true);
         setStatus("idle");
-        addLog("system", `Connected to ${selectedPort} at ${baudrate}`);
+        addLog("system", `Connected to ${portToUse} at ${baudToUse}`);
     }, [selectedPort, baudrate, addLog]);
 
     const disconnect = useCallback(() => {

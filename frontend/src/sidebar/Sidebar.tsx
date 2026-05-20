@@ -1,15 +1,15 @@
 import "./Sidebar.css"
 import * as IoIcons from "react-icons/io";
 import * as Io5Icons from "react-icons/io5";
-import Dropdown from "../topbar/comp/Dropdown.tsx";
+import {Dropdown, type DropdownRef} from "../topbar/comp/Dropdown.tsx";
 import DropdownButton from "../topbar/comp/DropdownButton.tsx";
 import {useModal} from "../providers/ModalContext.tsx";
-import {useRef, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {useGRBL} from "../providers/GRBLContext.tsx";
 import {useContextMenu} from "../providers/ContextMenuContext.tsx";
 import {useUI} from "../providers/UIContext.tsx";
-import type {ButtonType} from "../types.ts";
-import { PiPlugsConnectedLight, PiPlugsLight } from "react-icons/pi";
+import type {ButtonType, PortInfo} from "../types.ts";
+import {PiPlugsConnectedLight, PiPlugsLight} from "react-icons/pi";
 
 const Icons = {
     ...IoIcons,
@@ -42,7 +42,7 @@ function AddButtonModal() {
             gcode2Ref.current.value = "";
         }
 
-        addButton({text, gcode1, gcode2, isToggle: mode, id: Math.random()*10000, icon});
+        addButton({text, gcode1, gcode2, isToggle: mode, id: Math.random() * 10000, icon});
         close();
     }
 
@@ -57,7 +57,7 @@ function AddButtonModal() {
                         <button onClick={() => setChoosingIcon(!choosingIcon)}>
                             {entry && (() => {
                                 const Component = entry[1] as React.ComponentType;
-                                return <Component />;
+                                return <Component/>;
                             })()}
                         </button>
                     </div>
@@ -68,13 +68,13 @@ function AddButtonModal() {
                 </div>
                 {choosingIcon && <div id={"icon-selection"}>
                     {Object.entries(Icons).map(([name, Icon], i) => {
-                         const Component = Icon;
+                        const Component = Icon;
 
-                         return <div key={i} className={"btn"+(icon===name ? " selected" : "")} onClick={() => {
+                        return <div key={i} className={"btn" + (icon === name ? " selected" : "")} onClick={() => {
                             setIcon(name);
-                         }}>
-                             <Component size={"5dvh"} />
-                         </div>;
+                        }}>
+                            <Component size={"5dvh"}/>
+                        </div>;
                     })}
                 </div>}
                 <h3>Button GCode</h3>
@@ -114,19 +114,19 @@ export function ButtonEntry(props: { type: ButtonType }) {
             removeButton(props.type.id);
             close();
         }}>Delete</button>)
-    }} className={"btn"+(toggled ? " toggled" : "")} onClick={() => {
-        if(props.type.isToggle) {
-            if(toggled && props.type.gcode2) {
+    }} className={"btn" + (toggled ? " toggled" : "")} onClick={() => {
+        if (props.type.isToggle) {
+            if (toggled && props.type.gcode2) {
                 for (const line of props.type.gcode2.split("\n")) {
                     sendLine(line);
                 }
-            }else {
+            } else {
                 for (const line of props.type.gcode1.split("\n")) {
                     sendLine(line);
                 }
             }
             setToggled(!toggled);
-        }else {
+        } else {
             for (const line of props.type.gcode1.split("\n")) {
                 sendLine(line);
             }
@@ -134,38 +134,85 @@ export function ButtonEntry(props: { type: ButtonType }) {
     }}>
         {entry && (() => {
             const Component = entry[1] as React.ComponentType;
-            return <Component />;
+            return <Component/>;
         })()}
         <div>{props.type.text}</div>
     </div>;
 }
 
 export default function Sidebar() {
+    const portRef = useRef<DropdownRef<PortInfo> | null>(null);
+    const baudRef = useRef<DropdownRef<number> | null>(null);
+
     const {showModal} = useModal();
     const {buttons} = useUI();
-    const {ports} = useGRBL();
     const {handleContextMenu, close} = useContextMenu();
+
+    const {ports, refreshPorts, disconnect, connect, setBaudrate, setSelectedPort} = useGRBL();
     const [connected, setConnected] = useState(false);
 
     const baudrates = [110, 300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 38400, 57600, 115200, 128000, 230400, 256000, 460800, 921600]
 
+    useEffect(() => {
+        refreshPorts();
+    }, [refreshPorts]);
+
+    const handleConnect = () => {
+        if (connected) {
+            disconnect();
+            setConnected(false);
+            return;
+        }
+
+        const rate = baudRef.current?.selection();
+        const port = portRef.current?.selection();
+
+        alert(rate);
+        alert(port?.path);
+
+        if (rate && port) {
+            setBaudrate(rate);
+            setSelectedPort(port.path);
+
+            connect(port.path, rate);
+            setConnected(true);
+        }
+    };
+
     return <div id={"sidebar"}>
         <div id={"sidebar-port-panel"}>
             <div id={"cnc-settings"}>
-                <Dropdown icon={<></>} text={"Port"} id={"port"}>
-                    {ports.map((p) => {
-                        alert(p.path())
-                        return <DropdownButton text={p.name()}/>
-                    })}
+                <Dropdown<PortInfo>
+                    ref={portRef}
+                    icon={<></>}
+                    text={"Select Port"}
+                    id="port"
+                >
+                    {ports.map(port => (
+                        <DropdownButton
+                            key={port.path}
+                            text={port.name}
+                            closeOnClick
+                            onClick={() => {
+                                portRef.current?.setSelection(port);
+                                portRef.current?.setSelectionText(port.name)
+                            }}
+                        />
+                    ))}
                 </Dropdown>
-                <Dropdown icon={<></>} text={"Baud Rate"} id={"baud"}>
+                <Dropdown<number> ref={baudRef} icon={<></>} text={"Baud Rate"} id={"baud"}>
                     {baudrates.map((b, i) => {
-                        return <DropdownButton key={i} text={b.toString()} closeOnClick onClick={() => {
-
-                        }}/>
+                        return <DropdownButton
+                            key={i}
+                            text={b.toString()}
+                            closeOnClick
+                            onClick={() => {
+                                baudRef.current?.setSelection(b);
+                                baudRef.current?.setSelectionText(b.toString());
+                            }}/>
                     })}
                 </Dropdown>
-                <button className={"btn"} onClick={() => setConnected(!connected)}>
+                <button className={"btn"} onClick={() => handleConnect()}>
                     {!connected ? <PiPlugsLight/> : <PiPlugsConnectedLight/>}
                 </button>
             </div>
