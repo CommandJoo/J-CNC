@@ -117,12 +117,53 @@ function parseGCode(text: string): GCodeLine[] {
 }
 
 export function GRBLProvider({children}: { children: React.ReactNode }) {
+    const accessBaudrate = () => {
+        try {
+            const item = localStorage.getItem("baudrate");
+            return item ? (JSON.parse(item) as number) : 115200;
+        } catch (error) {
+            console.error("Error reading localStorage key:", "baudrate", error);
+            return 115200;
+        }
+    }
+    const accessPort = () => {
+        try {
+            const item = localStorage.getItem("port");
+            return item ? (JSON.parse(item) as string) : null;
+        } catch (error) {
+            console.error("Error reading localStorage key:", "port", error);
+            return null;
+        }
+    }
+
     const cnc = getCNC();
 
     const [ports, setPorts] = useState<PortInfo[]>([]);
-    const [selectedPort, setSelectedPort] = useState<string | null>(null);
-    const [baudrate, setBaudrate] = useState(115200);
+    const [selectedPort, setStoredSelectedPort] = useState<string | null>(accessPort());
+    const [baudrate, setStoredBaudrate] = useState(accessBaudrate());
     const [connected, setConnected] = useState(false);
+
+    const setSelectedPort = (value: string|null) => {
+        try {
+            const valueToStore = value;
+            setStoredSelectedPort(valueToStore);
+            localStorage.setItem("port", JSON.stringify(valueToStore));
+
+        } catch (error) {
+            console.error("Error setting localStorage key:", "port", error);
+        }
+    };
+
+    const setBaudrate = (value: number) => {
+        try {
+            const valueToStore = value;
+            setStoredBaudrate(valueToStore);
+            localStorage.setItem("baudrate", JSON.stringify(valueToStore));
+
+        } catch (error) {
+            console.error("Error setting localStorage key:", "baudrate", error);
+        }
+    };
 
     const [status, setStatus] = useState<MachineStatus>("disconnected");
     const [position, setPosition] = useState<Position>({});

@@ -148,7 +148,7 @@ export default function Sidebar() {
     const {buttons} = useUI();
     const {handleContextMenu, close} = useContextMenu();
 
-    const {ports, refreshPorts, disconnect, connect, setBaudrate, setSelectedPort} = useGRBL();
+    const {ports, baudrate, selectedPort, refreshPorts, disconnect, connect, setBaudrate, setSelectedPort} = useGRBL();
     const [connected, setConnected] = useState(false);
 
     const baudrates = [110, 300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 38400, 57600, 115200, 128000, 230400, 256000, 460800, 921600]
@@ -182,7 +182,7 @@ export default function Sidebar() {
                 <Dropdown<PortInfo>
                     ref={portRef}
                     icon={<></>}
-                    text={"Select Port"}
+                    text={selectedPort ?? "Select Port"}
                     id="port"
                 >
                     {ports.map(port => (
@@ -193,11 +193,12 @@ export default function Sidebar() {
                             onClick={() => {
                                 portRef.current?.setSelection(port);
                                 portRef.current?.setSelectionText(port.name)
+                                setSelectedPort(port.path);
                             }}
                         />
                     ))}
                 </Dropdown>
-                <Dropdown<number> ref={baudRef} icon={<></>} text={"Baud Rate"} id={"baud"}>
+                <Dropdown<number> ref={baudRef} icon={<></>} text={baudrate.toString()} id={"baud"}>
                     {baudrates.map((b, i) => {
                         return <DropdownButton
                             key={i}
@@ -206,6 +207,7 @@ export default function Sidebar() {
                             onClick={() => {
                                 baudRef.current?.setSelection(b);
                                 baudRef.current?.setSelectionText(b.toString());
+                                setBaudrate(b);
                             }}/>
                     })}
                 </Dropdown>

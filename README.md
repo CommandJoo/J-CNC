@@ -54,10 +54,6 @@ cd ..
 - laser power
 - feedrate
 
-### Settings:
-- save baudrate
-- save last port
-
 ### Safety:
 - emergency stop
 - disconnect handling
