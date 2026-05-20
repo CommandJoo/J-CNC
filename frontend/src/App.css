@@ -10,6 +10,8 @@
 
         --red: #FF4444DD;
         --blue: #4444FFDD;
+        --green: #44FF66;
+        --yellow: #FFFF44;
     }
 
     &[data-theme="dark"] {
@@ -21,8 +23,10 @@
         --color: hsl(220, 100%, 98%);
         --color-muted: hsl(220, 50%, 92%);
 
-        --red: #FF4444DD;
-        --blue: #4444FFDD;
+        --red: #FF4444;
+        --blue: #4444FF;
+        --green: #44FF66;
+        --yellow: #FFFF44;
     }
 
     &[data-theme="dracula"] {
@@ -36,6 +40,8 @@
 
         --red: #FF5555;
         --blue: #BD93F9;
+        --green: #50FA7B;
+        --yellow: #F1FA8C;
     }
 
     &[data-theme="monokai"] {
@@ -49,6 +55,8 @@
 
         --red: #F85E84;
         --blue: #AB9DF2;
+        --green: #A9DC76;
+        --yellow: #E5C463;
     }
 
     --ruler-color: var(--color-muted);

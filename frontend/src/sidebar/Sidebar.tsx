@@ -148,8 +148,7 @@ export default function Sidebar() {
     const {buttons} = useUI();
     const {handleContextMenu, close} = useContextMenu();
 
-    const {ports, baudrate, selectedPort, refreshPorts, disconnect, connect, setBaudrate, setSelectedPort} = useGRBL();
-    const [connected, setConnected] = useState(false);
+    const {ports, baudrate, selectedPort, connected, refreshPorts, disconnect, connect, setBaudrate, setSelectedPort} = useGRBL();
 
     const baudrates = [110, 300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 38400, 57600, 115200, 128000, 230400, 256000, 460800, 921600]
 
@@ -160,7 +159,6 @@ export default function Sidebar() {
     const handleConnect = () => {
         if (connected) {
             disconnect();
-            setConnected(false);
             return;
         }
 
@@ -172,7 +170,6 @@ export default function Sidebar() {
             setSelectedPort(port.path);
 
             connect(port.path, rate);
-            setConnected(true);
         }
     };
 
@@ -211,7 +208,7 @@ export default function Sidebar() {
                             }}/>
                     })}
                 </Dropdown>
-                <button className={"btn"} onClick={() => handleConnect()}>
+                <button className={"btn"+(connected ? " connected" : " disconnected")} onClick={() => handleConnect()}>
                     {!connected ? <PiPlugsLight/> : <PiPlugsConnectedLight/>}
                 </button>
             </div>

@@ -57,8 +57,9 @@
             }
 
             .btn {
-                min-width: 10%;
-                font-size: 1.5rem;
+                height: 100%;
+                aspect-ratio: 1/1;
+                flex: 0 0 auto;
 
                 border: none;
                 outline: none;
@@ -66,8 +67,38 @@
                 background: var(--bg-light);
                 border-radius: 4px;
 
+                display: flex;
+                justify-content: center;
+                align-items: center;
+
+                box-sizing: border-box;
+                font-size: 1.7rem;
+                font-weight: 1000;
+
+                &.disconnected {
+                    background: var(--bg-dark);
+                    path {
+                        color: var(--green);
+                        stroke-width: 8px;
+                    }
+                }
+
                 &:hover {
-                    background: var(--bg-highlight);
+                    background: var(--bg);
+                }
+
+                &.connected {
+                    background: var(--red);
+                    path {
+                        color: var(--bg-dark);
+                        stroke-width: 6px;
+                    }
+
+                    &:hover {
+                        path {
+                            color: var(--bg);
+                        }
+                    }
                 }
             }
         }
