@@ -55,70 +55,70 @@ export default function Preview() {
         const oy = offset.current.y;
         const step = getStepSize(s);
 
-        const worldLeft   = -ox / s;
-        const worldRight  = (width - ox) / s;
-        const worldTop    = oy / s;
+        const worldLeft = -ox / s;
+        const worldRight = (width - ox) / s;
+        const worldTop = oy / s;
         const worldBottom = (oy - height) / s;
 
         const firstX = Math.ceil(worldLeft / step) * step;
         const firstY = Math.floor(worldTop / step) * step;
 
-        const PAD     = 4;
+        const PAD = 4;
         const EPSILON = step * 0.01;
 
         ctx.save();
         ctx.font = "10px monospace";
 
-        const colorRuler   = getCSSVar(canvasRef.current, "--ruler-color");
+        const colorRuler = getCSSVar(canvasRef.current, "--ruler-color");
         const colorNumbers = getCSSVar(canvasRef.current, "--number-color");
-        const colorUnit    = getCSSVar(canvasRef.current, "--unit-color");
-        const colorRed     = getCSSVar(canvasRef.current, "--red");
-        const colorBlue    = getCSSVar(canvasRef.current, "--blue");
+        const colorUnit = getCSSVar(canvasRef.current, "--unit-color");
+        const colorRed = getCSSVar(canvasRef.current, "--red");
+        const colorBlue = getCSSVar(canvasRef.current, "--blue");
 
         for (let wx = firstX; wx <= worldRight; wx += step) {
-            const sx       = wx * s + ox;
+            const sx = wx * s + ox;
             const isOrigin = Math.abs(wx) < EPSILON;
-            const label    = isOrigin ? "0" : formatLabel(wx, step);
+            const label = isOrigin ? "0" : formatLabel(wx, step);
 
             ctx.beginPath();
             ctx.strokeStyle = isOrigin ? colorRed : colorRuler;
-            ctx.lineWidth   = isOrigin ? 2 : 1;
+            ctx.lineWidth = isOrigin ? 2 : 1;
             ctx.moveTo(sx, 0);
             ctx.lineTo(sx, height);
             ctx.stroke();
 
-            ctx.fillStyle    = isOrigin ? colorRed : colorNumbers;
+            ctx.fillStyle = isOrigin ? colorRed : colorNumbers;
             ctx.textBaseline = "top";
-            ctx.textAlign    = "left";
+            ctx.textAlign = "left";
             ctx.fillText(label, sx + PAD, PAD);
             ctx.textBaseline = "bottom";
             ctx.fillText(label, sx + PAD, height - PAD);
         }
 
         for (let wy = firstY; wy >= worldBottom; wy -= step) {
-            const sy       = oy - wy * s;
+            const sy = oy - wy * s;
             const isOrigin = Math.abs(wy) < EPSILON;
-            const label    = isOrigin ? "0" : formatLabel(wy, step);
+            const label = isOrigin ? "0" : formatLabel(wy, step);
 
             ctx.beginPath();
             ctx.strokeStyle = isOrigin ? colorBlue : colorRuler;
-            ctx.lineWidth   = isOrigin ? 2 : 1;
+            ctx.lineWidth = isOrigin ? 2 : 1;
             ctx.moveTo(0, sy);
             ctx.lineTo(width, sy);
             ctx.stroke();
 
-            ctx.fillStyle    = isOrigin ? colorBlue : colorNumbers;
+            ctx.fillStyle = isOrigin ? colorBlue : colorNumbers;
             ctx.textBaseline = "middle";
-            ctx.textAlign    = "left";
+            ctx.textAlign = "left";
             ctx.fillText(label, PAD, sy);
             ctx.textAlign = "right";
             ctx.fillText(label, width - PAD, sy);
         }
 
-        ctx.textAlign    = "left";
+        ctx.textAlign = "left";
         ctx.textBaseline = "bottom";
-        ctx.font         = "14px monospace";
-        ctx.fillStyle    = colorUnit;
+        ctx.font = "14px monospace";
+        ctx.fillStyle = colorUnit;
         ctx.fillText(`${step >= 10 ? "cm" : "mm"}`, PAD, height - PAD);
 
         ctx.restore();
@@ -126,7 +126,7 @@ export default function Preview() {
 
     useEffect(() => {
         const rapid = new Path2D();
-        const cut   = new Path2D();
+        const cut = new Path2D();
 
         let cx = 0, cy = 0;
 
@@ -137,7 +137,7 @@ export default function Preview() {
             if (!line) return;
 
             const parts = line.split(/\s+/);
-            const code  = parts[0].toUpperCase();
+            const code = parts[0].toUpperCase();
 
             if (code !== "G0" && code !== "G1" && code !== "G00" && code !== "G01") return;
 
@@ -171,7 +171,7 @@ export default function Preview() {
             cy = y;
         });
 
-        pathCache.current = { rapid, cut };
+        pathCache.current = {rapid, cut};
         redrawRef.current?.();
     }, [grbl.buffer]);
 
@@ -196,11 +196,11 @@ export default function Preview() {
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
 
-        let width    = 0;
-        let height   = 0;
-        let dpr      = 1;
+        let width = 0;
+        let height = 0;
+        let dpr = 1;
         let minScale = 1;
-        let rafId    = 0;
+        let rafId = 0;
         const MAX_SCALE = 200;
 
         const redraw = () => {
@@ -222,15 +222,15 @@ export default function Preview() {
         const resizeCanvas = () => {
             const rect = canvas.getBoundingClientRect();
 
-            const oldWidth  = width;
+            const oldWidth = width;
             const oldHeight = height;
 
-            width    = rect.width;
-            height   = rect.height;
-            dpr      = Math.min(window.devicePixelRatio || 1, 1);
+            width = rect.width;
+            height = rect.height;
+            dpr = Math.min(window.devicePixelRatio || 1, 1);
             minScale = Math.min(width, height) / (WORLD_LIMIT * 2);
 
-            canvas.width  = Math.round(width * dpr);
+            canvas.width = Math.round(width * dpr);
             canvas.height = Math.round(height * dpr);
 
             if (oldWidth === 0 || oldHeight === 0) {
@@ -246,17 +246,17 @@ export default function Preview() {
         };
 
         const onMouseDown = (e: MouseEvent) => {
-            isPanning.current  = true;
-            lastMouse.current  = {x: e.clientX, y: e.clientY};
+            isPanning.current = true;
+            lastMouse.current = {x: e.clientX, y: e.clientY};
         };
 
         const onMouseMove = (e: MouseEvent) => {
-            const rect    = canvas.getBoundingClientRect();
+            const rect = canvas.getBoundingClientRect();
             const screenX = e.clientX - rect.left;
             const screenY = e.clientY - rect.top;
 
             setCursorPos({
-                x:  (screenX - offset.current.x) / scale.current,
+                x: (screenX - offset.current.x) / scale.current,
                 y: -(screenY - offset.current.y) / scale.current,
             });
 
@@ -272,22 +272,27 @@ export default function Preview() {
             rafId = requestAnimationFrame(redraw);
         };
 
-        const onMouseUp    = () => { isPanning.current = false; };
-        const onMouseLeave = () => { isPanning.current = false; setCursorPos(null); };
+        const onMouseUp = () => {
+            isPanning.current = false;
+        };
+        const onMouseLeave = () => {
+            isPanning.current = false;
+            setCursorPos(null);
+        };
 
         const onWheel = (e: WheelEvent) => {
             e.preventDefault();
 
-            const rect    = canvas.getBoundingClientRect();
-            const mouseX  = e.clientX - rect.left;
-            const mouseY  = e.clientY - rect.top;
-            const factor  = 1 - e.deltaY * 0.0005;
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            const factor = 1 - e.deltaY * 0.0005;
             const newScale = Math.min(MAX_SCALE, Math.max(minScale, scale.current * factor));
-            const actual   = newScale / scale.current;
+            const actual = newScale / scale.current;
 
-            scale.current      = newScale;
-            offset.current.x   = mouseX - (mouseX - offset.current.x) * actual;
-            offset.current.y   = mouseY - (mouseY - offset.current.y) * actual;
+            scale.current = newScale;
+            offset.current.x = mouseX - (mouseX - offset.current.x) * actual;
+            offset.current.y = mouseY - (mouseY - offset.current.y) * actual;
 
             clampOffset(width, height);
 
@@ -298,11 +303,11 @@ export default function Preview() {
         const resizeObserver = new ResizeObserver(resizeCanvas);
         resizeObserver.observe(canvas);
 
-        canvas.addEventListener("mousedown",  onMouseDown);
-        canvas.addEventListener("mousemove",  onMouseMove);
-        canvas.addEventListener("mouseup",    onMouseUp);
+        canvas.addEventListener("mousedown", onMouseDown);
+        canvas.addEventListener("mousemove", onMouseMove);
+        canvas.addEventListener("mouseup", onMouseUp);
         canvas.addEventListener("mouseleave", onMouseLeave);
-        canvas.addEventListener("wheel",      onWheel, {passive: false});
+        canvas.addEventListener("wheel", onWheel, {passive: false});
 
         resizeCanvas();
 
@@ -310,27 +315,28 @@ export default function Preview() {
             resizeObserver.disconnect();
             cancelAnimationFrame(rafId);
             redrawRef.current = null;
-            canvas.removeEventListener("mousedown",  onMouseDown);
-            canvas.removeEventListener("mousemove",  onMouseMove);
-            canvas.removeEventListener("mouseup",    onMouseUp);
+            canvas.removeEventListener("mousedown", onMouseDown);
+            canvas.removeEventListener("mousemove", onMouseMove);
+            canvas.removeEventListener("mouseup", onMouseUp);
             canvas.removeEventListener("mouseleave", onMouseLeave);
-            canvas.removeEventListener("wheel",      onWheel);
+            canvas.removeEventListener("wheel", onWheel);
         };
     }, [draw, drawRulers]);
 
     return (
         <div id={"preview"} style={{position: "relative"}}>
             <canvas ref={canvasRef} id={"canvas"}/>
-            {cursorPos && (
-                <div id={"info"}>
-                    <div></div>
-                    <div>{"X     "}</div>
-                    <div>{"Y     "}</div>
-                    <div className={"first"}>Cursor</div>
-                    <div>{`${(cursorPos.x / 10).toFixed(2)}cm`}</div>
-                    <div>{`${(cursorPos.y / 10).toFixed(2)}cm`}</div>
-                </div>
-            )}
+            <div id={"info"}>
+                <div></div>
+                <div>{"X     "}</div>
+                <div>{"Y     "}</div>
+                <div className={"first"}>Cursor</div>
+                <div>{`${((cursorPos ? cursorPos.x : 0) / 10).toFixed(2)}cm`}</div>
+                <div>{`${((cursorPos ? cursorPos.y : 0) / 10).toFixed(2)}cm`}</div>
+                <div className={"first"}>Machine</div>
+                <div>{`${((grbl.position.machine?.x ?? 0) / 10).toFixed(2)}cm`}</div>
+                <div>{`${((grbl.position.machine?.y ?? 0) / 10).toFixed(2)}cm`}</div>
+            </div>
         </div>
     );
 }

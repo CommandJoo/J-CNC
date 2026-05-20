@@ -30,12 +30,14 @@
         color: #FFF;
 
         display: grid;
-        grid-template-columns: 2fr 3fr 3fr;
+        grid-template-columns: 3fr 3fr 3fr;
         column-gap: 0.5dvw;
 
         div {
             text-align: right;
             white-space: preserve;
+            flex: 1;
+            flex-shrink: 0;
 
             &.first {
                 text-align: left;
