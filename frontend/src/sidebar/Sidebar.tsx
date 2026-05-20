@@ -167,9 +167,6 @@ export default function Sidebar() {
         const rate = baudRef.current?.selection();
         const port = portRef.current?.selection();
 
-        alert(rate);
-        alert(port?.path);
-
         if (rate && port) {
             setBaudrate(rate);
             setSelectedPort(port.path);

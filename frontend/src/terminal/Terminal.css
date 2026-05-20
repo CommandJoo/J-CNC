@@ -32,5 +32,11 @@
         &:focus {
             background: var(--bg-highlight);
         }
+
+        &:disabled {
+            pointer-events: none;
+            background: var(--bg);
+            color: var(--bg);
+        }
     }
 }

@@ -81,6 +81,8 @@ type GRBLContextType = {
 
     handleIncomingLine: (line: string) => void;
     clearLog: () => void;
+
+    controlsDisabled: boolean,
 };
 
 const GRBLContext = createContext<GRBLContextType | null>(null);
@@ -123,7 +125,7 @@ export function GRBLProvider({children}: { children: React.ReactNode }) {
     const [connected, setConnected] = useState(false);
 
     const [status, setStatus] = useState<MachineStatus>("disconnected");
-    const [position] = useState<Position>({});
+    const [position, setPosition] = useState<Position>({});
 
     const [buffer, setBuffer] = useState<GCodeLine[]>([]);
     const [currentLineIndex, setCurrentLineIndex] = useState(0);
@@ -134,6 +136,74 @@ export function GRBLProvider({children}: { children: React.ReactNode }) {
     const bufferRef = useRef<GCodeLine[]>([]);
     const currentLineIndexRef = useRef(0);
     const jobStateRef = useRef<JobState>("idle");
+
+    function parseAxis(value: string) {
+        const [x, y, z] = value.split(",").map(Number);
+
+        if ([x, y, z].some(Number.isNaN)) return undefined;
+
+        return { x, y, z };
+    }
+
+    function parseStatusWord(value: string): MachineStatus {
+        const status = value.toLowerCase();
+
+        if (status.startsWith("idle")) return "idle";
+        if (status.startsWith("run")) return "run";
+        if (status.startsWith("hold")) return "hold";
+        if (status.startsWith("alarm")) return "alarm";
+        if (status.startsWith("door")) return "hold";
+        if (status.startsWith("check")) return "idle";
+        if (status.startsWith("home")) return "run";
+        if (status.startsWith("sleep")) return "idle";
+
+        return "idle";
+    }
+
+    function parseStatusLine(line: string) {
+        const trimmed = line.trim();
+        if (trimmed.startsWith("<") && trimmed.endsWith(">")) {
+            const content = trimmed.slice(1, -1);
+            const parts = content.split("|");
+
+            const statusWord = parts[0];
+            const parsedStatus = parseStatusWord(statusWord);
+
+            setStatus(parsedStatus);
+
+            const nextPosition: Position = {};
+
+            for (const part of parts.slice(1)) {
+                const [key, value] = part.split(":");
+
+                if (!key || !value) continue;
+
+                switch (key) {
+                    case "MPos": {
+                        const machine = parseAxis(value);
+                        if (machine) nextPosition.machine = machine;
+                        break;
+                    }
+
+                    case "WPos": {
+                        const work = parseAxis(value);
+                        if (work) nextPosition.work = work;
+                        break;
+                    }
+
+                    default:
+                        break;
+                }
+            }
+
+            setPosition(prev => ({
+                machine: nextPosition.machine ?? prev.machine,
+                work: nextPosition.work ?? prev.work,
+            }));
+
+            return;
+        }
+    }
 
     const addLog = useCallback((direction: ConsoleEntry["direction"], text: string) => {
         setLog(prev => [
@@ -320,15 +390,7 @@ export function GRBLProvider({children}: { children: React.ReactNode }) {
 
         // GRBL status report, for example:
         // <Idle|MPos:0.000,0.000,0.000|FS:0,0>
-        if (trimmed.startsWith("<") && trimmed.endsWith(">")) {
-            if (normalized.startsWith("<idle")) {
-                // later: parse position/status here
-                return;
-            }
-
-            addLog("in", trimmed);
-            return;
-        }
+        parseStatusLine(trimmed);
 
         addLog("in", trimmed);
 
@@ -365,7 +427,7 @@ export function GRBLProvider({children}: { children: React.ReactNode }) {
             setStatus("alarm");
             addLog("system", `GRBL alarm: ${trimmed}`);
         }
-    }, [addLog, sendNextBufferLine, setJobStateSafe]);
+    }, [addLog, parseStatusLine, sendNextBufferLine, setJobStateSafe]);
 
     const clearLog = useCallback(() => {
         setLog([]);
@@ -382,6 +444,13 @@ export function GRBLProvider({children}: { children: React.ReactNode }) {
             delete (window as any).onGrblResponse;
         };
     }, [handleIncomingLine]);
+
+    const controlsDisabled =
+        jobState === "running" ||
+        status === "run" ||
+        status === "hold" ||
+        status === "alarm" ||
+        status === "error";
 
     const value = useMemo<GRBLContextType>(() => ({
         cnc,
@@ -419,6 +488,8 @@ export function GRBLProvider({children}: { children: React.ReactNode }) {
 
         handleIncomingLine,
         clearLog,
+
+        controlsDisabled,
     }), [
         cnc,
         ports,
@@ -443,6 +514,8 @@ export function GRBLProvider({children}: { children: React.ReactNode }) {
         stop,
         handleIncomingLine,
         clearLog,
+
+        controlsDisabled,
     ]);
 
     return (

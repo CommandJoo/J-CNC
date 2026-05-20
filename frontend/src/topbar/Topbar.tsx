@@ -14,37 +14,37 @@ export default function Topbar() {
 
     return (
         <div id="topbar">
-            <input
-                type="file"
-                ref={fileInputRef}
-                style={{display: "none"}}
-                accept=".gcode,.nc,.cnc,.tap,.svg"
-                onChange={async (e) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-
-                    const text = await file.text();
-                    const name = file.name.toLowerCase();
-
-                    if (name.endsWith(".svg")) {
-                        const converter = cnc?.converter();
-
-                        if (!converter) {
-                            console.warn("SVG converter not available");
-                            return;
-                        }
-
-                        const gcode = converter.convert(text);
-                        loadGCode(gcode);
-                    } else {
-                        loadGCode(text);
-                    }
-
-                    e.currentTarget.value = "";
-                }}
-            />
 
             <Dropdown icon={<IoFileTray className="icon" size={20}/>} text="File" id="file">
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    style={{display: "none"}}
+                    accept=".gcode,.nc,.cnc,.tap,.svg"
+                    onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+
+                        const text = await file.text();
+                        const name = file.name.toLowerCase();
+
+                        if (name.endsWith(".svg")) {
+                            const converter = cnc?.converter();
+
+                            if (!converter) {
+                                console.warn("SVG converter not available");
+                                return;
+                            }
+
+                            const gcode = converter.convert(text);
+                            loadGCode(gcode);
+                        } else {
+                            loadGCode(text);
+                        }
+
+                        e.currentTarget.value = "";
+                    }}
+                />
                 <DropdownButton
                     text="Open File"
                     onClick={() => fileInputRef.current?.click()}

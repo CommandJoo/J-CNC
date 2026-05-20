@@ -22,7 +22,6 @@ cd ..
 
 ### Lock ui when running:
 - buttons
-- console input
 - file loading
 - connection settings
 

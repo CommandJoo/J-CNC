@@ -24,6 +24,7 @@ export default function Terminal() {
             </div>
 
             <input
+                disabled={grbl.controlsDisabled}
                 id="command"
                 placeholder="Type GCode..."
                 type="text"

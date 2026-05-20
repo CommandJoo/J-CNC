@@ -6,6 +6,8 @@
     padding: 0.5dvh;
     box-sizing: border-box;
     background: var(--bg-light);
+    text-wrap: nowrap;
+    flex-shrink: 0;
 }
 
 .dropdown-button:hover {
