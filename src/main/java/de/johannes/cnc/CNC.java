@@ -3,7 +3,7 @@ package de.johannes.cnc;
 import com.fazecast.jSerialComm.SerialPort;
 import javafx.application.Platform;
 import javafx.scene.web.WebEngine;
-import org.openjdk.nashorn.api.scripting.JSObject;
+import netscape.javascript.JSObject;
 
 import java.util.Arrays;
 import java.util.List;
@@ -11,6 +11,10 @@ import java.util.List;
 public class CNC {
 
     private final WebEngine engine;
+
+    private boolean polling;
+    private Thread pollingThread;
+
     private Console console;
     private SvgToGcode converter;
 
@@ -39,16 +43,35 @@ public class CNC {
                 win.call("onGrblResponse", line);
             });
         });
+        startPolling();
     }
 
     public void disconnect() {
         if (this.console != null) {
+            this.stopPolling();
             this.console.close();
             this.console = null;
         }
     }
 
+    private void startPolling() {
+        polling = true;
 
+        pollingThread = Thread.startVirtualThread(() -> {
+            while (polling && console != null) {
+                try {
+                    console.sendRealtime("?");
+                    Thread.sleep(250);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    private void stopPolling() {
+        polling = false;
+    }
 
     public PortInfo[] listPorts() {
         List<PortInfo> ports = Arrays.stream(SerialPort.getCommPorts()).map((p) -> {

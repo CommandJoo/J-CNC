@@ -312,9 +312,22 @@ export function GRBLProvider({children}: { children: React.ReactNode }) {
     }, [addLog, setJobStateSafe]);
 
     const handleIncomingLine = useCallback((line: string) => {
-        addLog("in", line);
+        const trimmed = line.trim();
+        const normalized = trimmed.toLowerCase();
 
-        const normalized = line.trim().toLowerCase();
+        // GRBL status report, for example:
+        // <Idle|MPos:0.000,0.000,0.000|FS:0,0>
+        if (trimmed.startsWith("<") && trimmed.endsWith(">")) {
+            if (normalized.startsWith("<idle")) {
+                // later: parse position/status here
+                return;
+            }
+
+            addLog("in", trimmed);
+            return;
+        }
+
+        addLog("in", trimmed);
 
         if (normalized === "ok") {
             const index = currentLineIndexRef.current;
@@ -323,7 +336,7 @@ export function GRBLProvider({children}: { children: React.ReactNode }) {
             if (sentLine) {
                 bufferRef.current = bufferRef.current.map(item =>
                     item.id === sentLine.id
-                        ? {...item, status: "ok"}
+                        ? { ...item, status: "ok" }
                         : item
                 );
 
@@ -340,14 +353,14 @@ export function GRBLProvider({children}: { children: React.ReactNode }) {
         if (normalized.startsWith("error")) {
             setJobStateSafe("error");
             setStatus("error");
-            addLog("system", `GRBL error: ${line}`);
+            addLog("system", `GRBL error: ${trimmed}`);
             return;
         }
 
         if (normalized.startsWith("alarm")) {
             setJobStateSafe("error");
             setStatus("alarm");
-            addLog("system", `GRBL alarm: ${line}`);
+            addLog("system", `GRBL alarm: ${trimmed}`);
         }
     }, [addLog, sendNextBufferLine, setJobStateSafe]);
 

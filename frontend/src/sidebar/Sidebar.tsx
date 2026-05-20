@@ -143,6 +143,7 @@ export function ButtonEntry(props: { type: ButtonType }) {
 export default function Sidebar() {
     const {showModal} = useModal();
     const {buttons} = useUI();
+    const {ports} = useGRBL();
     const {handleContextMenu, close} = useContextMenu();
     const [connected, setConnected] = useState(false);
 
@@ -152,8 +153,10 @@ export default function Sidebar() {
         <div id={"sidebar-port-panel"}>
             <div id={"cnc-settings"}>
                 <Dropdown icon={<></>} text={"Port"} id={"port"}>
-                    <DropdownButton text={"Port 1"} closeOnClick={true}/>
-                    <DropdownButton text={"Port 2"} closeOnClick={true}/>
+                    {ports.map((p) => {
+                        alert(p.path())
+                        return <DropdownButton text={p.name()}/>
+                    })}
                 </Dropdown>
                 <Dropdown icon={<></>} text={"Baud Rate"} id={"baud"}>
                     {baudrates.map((b, i) => {

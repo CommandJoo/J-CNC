@@ -1,11 +1,12 @@
 import "./Dropdown.css"
 import {useDropdown} from "../../providers/DropdownMenuContext.tsx";
+import type {ReactElement} from "react";
 
 type DropdownProps = {
     icon: React.ReactNode;
     text: string;
     id: string;
-    children: React.ReactNode[]
+    children: ReactElement[];
 }
 
 export default function Dropdown(props: DropdownProps) {
