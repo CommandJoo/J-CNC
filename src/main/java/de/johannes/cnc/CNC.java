@@ -3,6 +3,7 @@ package de.johannes.cnc;
 import com.fazecast.jSerialComm.SerialPort;
 import javafx.application.Platform;
 import javafx.scene.web.WebEngine;
+import javafx.stage.Stage;
 import netscape.javascript.JSObject;
 
 import java.util.Arrays;
@@ -11,6 +12,7 @@ import java.util.List;
 public class CNC {
 
     private final WebEngine engine;
+    private final Stage stage;
 
     private boolean polling;
     private Thread pollingThread;
@@ -18,8 +20,9 @@ public class CNC {
     private Console console;
     private SvgToGcode converter;
 
-    public CNC(WebEngine engine) {
+    public CNC(WebEngine engine, Stage stage) {
         this.engine = engine;
+        this.stage = stage;
         this.console = null;
         this.converter = new SvgToGcode();
     }
@@ -66,6 +69,13 @@ public class CNC {
                     e.printStackTrace();
                 }
             }
+        });
+    }
+
+    public void exit() {
+        Platform.runLater(() -> {
+            stage.close();
+            System.exit(0);
         });
     }
 

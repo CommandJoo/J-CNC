@@ -19,6 +19,7 @@ export type CNC = {
     connect: (port: string, baudrate: number) => void;
     disconnect: () => void;
     listPorts: () => PortInfo[];
+    exit: () => void;
 }
 
 export type Console = {

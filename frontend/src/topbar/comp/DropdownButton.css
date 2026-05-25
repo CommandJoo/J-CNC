@@ -8,8 +8,14 @@
     background: var(--bg-light);
     text-wrap: nowrap;
     flex-shrink: 0;
+
+    &.disabled {
+        color: var(--color-muted);
+    }
 }
 
 .dropdown-button:hover {
-    background: var(--bg-highlight);
+    &:not(.disabled) {
+        background: var(--bg-highlight);
+    }
 }

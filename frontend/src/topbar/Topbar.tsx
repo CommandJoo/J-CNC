@@ -9,7 +9,7 @@ import {useUI} from "../providers/UIContext.tsx";
 
 export default function Topbar() {
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const {cnc, loadGCode} = useGRBL();
+    const {cnc, loadGCode, setLastFile, lastFile} = useGRBL();
     const {setTheme} = useUI();
 
     return (
@@ -38,8 +38,10 @@ export default function Topbar() {
 
                             const gcode = converter.convert(text);
                             loadGCode(gcode);
+                            setLastFile(gcode);
                         } else {
                             loadGCode(text);
+                            setLastFile(text);
                         }
 
                         e.currentTarget.value = "";
@@ -50,8 +52,14 @@ export default function Topbar() {
                     onClick={() => fileInputRef.current?.click()}
                     closeOnClick
                 />
-                <DropdownButton text="Reopen File"/>
-                <DropdownButton text="Exit"/>
+                <DropdownButton text="Reopen File" disabled={!lastFile} onClick={() => {
+                    if(lastFile) {
+                        loadGCode(lastFile);
+                    }
+                }} closeOnClick/>
+                <DropdownButton text="Exit" closeOnClick onClick={() => {
+                    cnc?.exit();
+                }}/>
             </Dropdown>
 
             <Dropdown icon={<IoSettings className="icon" size={20}/>} text="Settings" id="settings">

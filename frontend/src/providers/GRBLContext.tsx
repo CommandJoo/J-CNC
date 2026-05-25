@@ -53,6 +53,9 @@ type GRBLContextType = {
     setSelectedPort: (port: string | null) => void;
     baudrate: number;
     setBaudrate: (baudrate: number) => void;
+    lastFile: string|null,
+    setLastFile: (lastFile: string) => void;
+
     connected: boolean;
 
     status: MachineStatus;
@@ -135,12 +138,22 @@ export function GRBLProvider({children}: { children: React.ReactNode }) {
             return null;
         }
     }
+    const accessLastFile = () => {
+        try {
+            const item = localStorage.getItem("last_file");
+            return item ? (JSON.parse(item) as string) : null;
+        } catch (error) {
+            console.error("Error reading localStorage key:", "last_file", error);
+            return null;
+        }
+    }
 
     const cnc = getCNC();
 
     const [ports, setPorts] = useState<PortInfo[]>([]);
     const [selectedPort, setStoredSelectedPort] = useState<string | null>(accessPort());
     const [baudrate, setStoredBaudrate] = useState(accessBaudrate());
+    const [lastFile, setStoredLastFile] = useState<string|null>(accessLastFile());
     const [connected, setConnected] = useState(false);
 
     const setSelectedPort = (value: string|null) => {
@@ -164,6 +177,17 @@ export function GRBLProvider({children}: { children: React.ReactNode }) {
             console.error("Error setting localStorage key:", "baudrate", error);
         }
     };
+
+    const setLastFile = (value: string) => {
+        try {
+            const valueToStore = value;
+            setStoredLastFile(valueToStore);
+            localStorage.setItem("last_file", JSON.stringify(valueToStore));
+
+        } catch (error) {
+            console.error("Error setting localStorage key:", "last_file", error);
+        }
+    }
 
     const [status, setStatus] = useState<MachineStatus>("disconnected");
     const [position, setPosition] = useState<Position>({});
@@ -501,6 +525,9 @@ export function GRBLProvider({children}: { children: React.ReactNode }) {
         setSelectedPort,
         baudrate,
         setBaudrate,
+        lastFile,
+        setLastFile,
+
         connected,
 
         status,
@@ -537,6 +564,7 @@ export function GRBLProvider({children}: { children: React.ReactNode }) {
         selectedPort,
         baudrate,
         connected,
+        lastFile,
         status,
         position,
         buffer,

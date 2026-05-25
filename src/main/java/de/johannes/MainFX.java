@@ -26,7 +26,7 @@ public class MainFX extends Application {
         WebView webView = new WebView();
         WebEngine engine = webView.getEngine();
 
-        CNC cnc = new CNC(engine);
+        CNC cnc = new CNC(engine, stage);
 //        cnc.connect("/dev/ttyUSB0", 115200);
 
         engine.getLoadWorker().stateProperty().addListener((obs, old, state) -> {

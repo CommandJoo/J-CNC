@@ -5,12 +5,13 @@ type DropdownButtonProps = {
     text: string;
     onClick?: (e: React.MouseEvent) => void;
     closeOnClick?: boolean;
+    disabled?: boolean;
 }
 
 export default function DropdownButton(props: DropdownButtonProps) {
     const {setCurrent} = useDropdown();
 
-    return <div className={"dropdown-button"} onClick={(e: React.MouseEvent) => {
+    return <div className={"dropdown-button "+(props.disabled ? "disabled" : "")} onClick={(e: React.MouseEvent) => {
         if(props.onClick) {
             props.onClick(e);
         }
