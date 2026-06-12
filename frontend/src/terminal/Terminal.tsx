@@ -1,5 +1,20 @@
 import "./Terminal.css";
-import { useGRBL } from "../providers/GRBLContext.tsx";
+import {type ConsoleEntry, useGRBL} from "../providers/GRBLContext.tsx";
+
+function TerminalLine({entry}: {entry: ConsoleEntry}) {
+    return (
+        <div
+            className={`line ${entry.direction}`}
+            key={entry.id}
+        >
+            {entry.direction === "in" && "< "}
+            {entry.direction === "out" && "> "}
+            {entry.direction === "system" && "* "}
+
+            {entry.text}
+        </div>
+    );
+}
 
 export default function Terminal() {
     const grbl = useGRBL();
@@ -8,18 +23,7 @@ export default function Terminal() {
         <div id="terminal">
             <div id="output">
                 {grbl.log.map(entry => {
-                    return (
-                        <div
-                            className={`line ${entry.direction}`}
-                            key={entry.id}
-                        >
-                            {entry.direction === "in" && "< "}
-                            {entry.direction === "out" && "> "}
-                            {entry.direction === "system" && "* "}
-
-                            {entry.text}
-                        </div>
-                    );
+                    return <TerminalLine entry={entry}/>
                 })}
             </div>
 

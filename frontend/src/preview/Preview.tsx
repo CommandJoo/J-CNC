@@ -15,6 +15,7 @@ export default function Preview() {
     const [cursorPos, setCursorPos] = useState<{ x: number, y: number } | null>(null);
     const pathCache = useRef<PathCache>(null);
     const redrawRef = useRef<(() => void) | null>(null);
+    const drawRef = useRef<((ctx: CanvasRenderingContext2D) => void) | null>(null);
 
     const grbl = useGRBL();
 
@@ -187,7 +188,23 @@ export default function Preview() {
         ctx.beginPath();
         ctx.strokeStyle = "#F00";
         ctx.stroke(pathCache.current.cut);
-    }, [scale]);
+
+        ctx.beginPath();
+        ctx.strokeStyle = "#0FF";
+        if (grbl.position.machine != null) {
+            ctx.moveTo(grbl.position.machine.x-10, grbl.position.machine.y);
+            ctx.lineTo(grbl.position.machine.x+10, grbl.position.machine.y);
+
+            ctx.moveTo(grbl.position.machine.x, grbl.position.machine.y-10);
+            ctx.lineTo(grbl.position.machine.x, grbl.position.machine.y+10);
+        }
+        ctx.stroke();
+
+    }, [grbl.position.machine]);
+
+    useEffect(() => {
+        drawRef.current = draw;
+    }, [draw]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -211,7 +228,7 @@ export default function Preview() {
             ctx.save();
             ctx.translate(offset.current.x, offset.current.y);
             ctx.scale(scale.current, -scale.current);
-            draw(ctx);
+            drawRef.current?.(ctx);
             ctx.restore();
 
             drawRulers(ctx, width, height);
@@ -321,7 +338,12 @@ export default function Preview() {
             canvas.removeEventListener("mouseleave", onMouseLeave);
             canvas.removeEventListener("wheel", onWheel);
         };
-    }, [draw, drawRulers]);
+    }, [drawRulers]);
+
+    useEffect(() => {
+        drawRef.current = draw;
+        redrawRef.current?.();
+    }, [draw]);
 
     return (
         <div id={"preview"} style={{position: "relative"}}>

@@ -162,13 +162,12 @@ export default function Sidebar() {
             return;
         }
 
-        const rate = baudRef.current?.selection();
-        const port = portRef.current?.selection();
+        const rate = baudRef.current?.selection() ?? baudrate;
+        const port = portRef.current?.selection() ?? (selectedPort ? { path: selectedPort } : null);
 
-        if (rate && port) {
+        if (port) {
             setBaudrate(rate);
             setSelectedPort(port.path);
-
             connect(port.path, rate);
         }
     };

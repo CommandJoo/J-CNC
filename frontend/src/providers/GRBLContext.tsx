@@ -9,7 +9,7 @@ import {
 import type {CNC, PortInfo} from "../types.ts";
 import "./GRBLContext.css";
 
-type MachineStatus =
+export type MachineStatus =
     | "disconnected"
     | "idle"
     | "run"
@@ -17,7 +17,7 @@ type MachineStatus =
     | "alarm"
     | "error";
 
-type JobState =
+export type JobState =
     | "idle"
     | "loaded"
     | "running"
@@ -26,26 +26,26 @@ type JobState =
     | "cancelled"
     | "error";
 
-type GCodeLine = {
+export type GCodeLine = {
     id: number;
     raw: string;
     type: "command" | "comment" | "empty";
     status: "pending" | "sent" | "ok" | "error" | "skipped";
 };
 
-type ConsoleEntry = {
+export type ConsoleEntry = {
     id: number;
     direction: "in" | "out" | "system";
     text: string;
     time: number;
 };
 
-type Position = {
+export type Position = {
     machine?: { x: number; y: number; z: number };
     work?: { x: number; y: number; z: number };
 };
 
-type GRBLContextType = {
+export type GRBLContextType = {
     cnc: CNC | null;
 
     ports: PortInfo[];
@@ -225,7 +225,7 @@ export function GRBLProvider({children}: { children: React.ReactNode }) {
         return "idle";
     }
 
-    function parseStatusLine(line: string) {
+    const parseStatusLine = useCallback((line: string) => {
         const trimmed = line.trim();
         if (trimmed.startsWith("<") && trimmed.endsWith(">")) {
             const content = trimmed.slice(1, -1);
@@ -268,7 +268,7 @@ export function GRBLProvider({children}: { children: React.ReactNode }) {
 
             return;
         }
-    }
+    }, []);
 
     const addLog = useCallback((direction: ConsoleEntry["direction"], text: string) => {
         setLog(prev => [
@@ -457,7 +457,9 @@ export function GRBLProvider({children}: { children: React.ReactNode }) {
         // <Idle|MPos:0.000,0.000,0.000|FS:0,0>
         parseStatusLine(trimmed);
 
-        addLog("in", trimmed);
+        if(!(trimmed.startsWith("<") && trimmed.endsWith(">"))) {
+            addLog("in", trimmed);
+        }
 
         if (normalized === "ok") {
             const index = currentLineIndexRef.current;

@@ -32,7 +32,6 @@ cd ..
 - clear button
 
 ### Preview improvements:
-- current machine position
 - current executing line
 - zoom to fit
 - grid toggle
